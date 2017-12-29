@@ -5,7 +5,8 @@
 	if ($_SESSION['email']){
 		echo '
 		<div class="container">
-		<p class="p-3 mb-2 bg-success text-white">You are successfully logged in as ' .$_SESSION['email']. '.</p>
+		<p >Username: ' .$_SESSION['email']. '</p>
+		<p> Password: ' .$_SESSION['password']. '</p>
 		</div>';
 	} else {
 		header("Location: index.php");

@@ -13,7 +13,7 @@ try{
 include("connection.php"); 
 
 
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = :email AND password = :password"); 
+    $stmt = $db->prepare("SELECT * FROM users_svds WHERE email = :email AND password = :password"); 
     $stmt->bindParam(':email', $_POST['email']);
     $stmt->bindParam(':password', $_POST['password']);
 
@@ -23,6 +23,7 @@ include("connection.php");
      
     if($result=$stmt->fetch(PDO::FETCH_ASSOC)){
     	$_SESSION['email'] = $_POST['email'];
+      $_SESSION['password'] = $_POST['password'];
     	header("Location: logged.php");     
 	} else {
 		echo '<p class="p-3 mb-2 bg-danger text-white">There was a problem. Try again later.</p>';
@@ -37,7 +38,7 @@ catch(PDOException $e)
     echo "Error: " . $e->getMessage();
     }
 
-$conn = null;
+$db = null;
 
 }
  include("header.php"); 

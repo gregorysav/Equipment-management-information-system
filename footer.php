@@ -6,6 +6,22 @@
   		window.location = "logout.php";
 	});
 
+	$("#add_equipment").click(function() {
+  		window.location = "equipment_add.php";
+	});
+
+
+	$("#modify_equipment").click(function() {
+  		window.location = "equipment_manage.php";
+	});
+
+	$("#modify").click(function() {
+  		window.location = "equipment_modify.php";
+	});
+
+
+	
+
 </script>
       
 </body>
