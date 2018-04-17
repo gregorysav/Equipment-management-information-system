@@ -183,13 +183,6 @@ include("footer.php");
 					<label for="comments_p">Provider Comments:</label>
 					<input type="text" class="form-control" id="comments_p" name="comments_p" required>
 
-					<!-- <form>
-					  <div class="form-group">
-					    <label for="real_filename">Equipment Image:</label>
-					    <input type="file" class="form-control-file" id="real_filename" name="real_filename">
-					  </div>
-					</form> -->
-
 					</div> 
 			    </div>
 
