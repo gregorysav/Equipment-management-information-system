@@ -1,11 +1,23 @@
 <?php
 	session_start();
-	include("header.php");
-	include("navbar.php");
+	include("views/header.php");
+	include("views/navbar.php");
 	if ($_SESSION['email']){
-		echo 'Active Borrows';
+		echo 'Ενεργοί Δανεισμοί'.'<br>';
+		echo '
+			 <button type="submit" id="active_borrows" class="btn btn-primary">Ενεργοί Δανεισμοί</button>
+		';
+
+		echo '
+			 <button type="submit" id="new_borrow" class="btn btn-primary">Νέος Δανεισμός</button>
+		';
+
+
+
+
+
 	} else {
 		header("Location: index.php");
 	}
-	include("footer.php");
+	include("views/footer.php");
 ?>

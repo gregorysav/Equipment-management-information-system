@@ -1,63 +1,27 @@
 <?php
-session_start();
-if (array_key_exists("logout", $_GET)){
-	unset($_SESSION);
-} else if (array_key_exists("email", $_SESSION)){
-	header("Location: logged.php");
-}
-
-
-if(isset($_POST['email'])){
-
-try{
-include("connection.php"); 
-
-
-    $stmt = $db->prepare("SELECT * FROM users_svds WHERE email = :email AND password = :password"); 
-    $stmt->bindParam(':email', $_POST['email']);
-    $stmt->bindParam(':password', $_POST['password']);
-
-    $stmt->execute();
-
-
-     
-    if($result=$stmt->fetch(PDO::FETCH_ASSOC)){
-    	$_SESSION['email'] = $_POST['email'];
-      $_SESSION['password'] = $_POST['password'];
-    	header("Location: logged.php");     
-	} else {
-		echo '<p class="p-3 mb-2 bg-danger text-white">There was a problem. Try again later.</p>';
-	} 
-
-
-
-
-}
-catch(PDOException $e)
-    {
-    echo "Error: " . $e->getMessage();
-    }
-
-$db = null;
-
-}
- include("header.php"); 
-
- 	echo '  
+  session_start();
+  include("views/connection.php");
+  include("views/header.php");
+  include("views/navbar.php");
+  if ($_SESSION['email']){
+    $current_email = $_SESSION['email'];
+    $usersQuery = $db->prepare("SELECT * FROM users_svds WHERE email= :email"); 
+    $usersQuery->bindParam(':email', $current_email);
+      $usersQuery->execute();
+      $result=$usersQuery->fetch(PDO::FETCH_ASSOC);
+      $_SESSION['username'] = $result['username'];
+      $_SESSION['aem'] = $result['aem'];
+      $_SESSION['last_name'] = $result['last_name'];
+      $_SESSION['first_name'] = $result['first_name'];
+      $_SESSION['type'] = $result['type'];
+      $_SESSION['telephone'] = $result['telephone'];
+    echo '
     <div class="container">
-        <form method="POST">
-          <div class="form-group">
-            <label for="email">Email address</label>
-            <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
-          </div>
-          <button name ="logout" value=1 type="submit" class="btn btn-primary">Log In</button>
-        </form>
-    </div> '; 
-
-
-include("footer.php"); 
+    <p class="p-3 mb-2 bg-success text-white">Έχετε συνδεθεί επιτυχώς ως ' .$_SESSION['email']. ' με ΑΕΜ ' .$_SESSION['aem']. '</p>
+    </div>';
+  } else {
+    header("Location: login.php");
+  }
+  include("views/footer.php");
 ?>
+

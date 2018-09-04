@@ -1,8 +1,8 @@
 <?php
 	session_start();
-	include("connection.php"); 
-	include("header.php");
-	include("navbar.php");
+	include("views/connection.php"); 
+	include("views/header.php");
+	include("views/navbar.php");
 
 	if(isset($_GET['q'])){
 
@@ -19,7 +19,7 @@
 	} else echo "No matches for that query";
 	}
 
-	include("footer.php");
+	include("views/footer.php");
 ?>
 
 <!DOCTYPE html>
@@ -32,14 +32,14 @@
 
 
 	        
-	        <h2>Search For Existing Equipment</h2>
+	        <h2>Αναζήτηση Εξαρτημάτων</h2>
 	        
 	        
 	<form class="form-inline">
 	  <div class="form-group">
-	    <input type="text" name="q" class="form-control" id="search" placeholder="Search Equipment">
+	    <input type="text" name="q" class="form-control" id="search" placeholder="Όνομα Εξαρτήματος">
 	  </div>
-	  <button type="submit" class="btn btn-primary">Search</button>
+	  <button type="submit" class="btn btn-primary">Αναζήτηση</button>
 	</form>
 
 

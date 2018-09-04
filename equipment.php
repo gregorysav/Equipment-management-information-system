@@ -1,16 +1,16 @@
 <?php
 	session_start();
-	include("header.php");
-	include("navbar.php");
+	include("views/header.php");
+	include("views/navbar.php");
 	if ($_SESSION['email']){
 		echo '
-			<h2>You can Manage your equipment here</h2>
-		    <button type="submit" id="add_equipment" class="btn btn-success btn-info">Add Equipment</button>
-	        <button type="submit" id="modify_equipment"class="btn btn-primary btn-danger">Delete / Modify Equipment</button>
+			<h2>Σελίδα Διαχείρισης Εξαρτημάτων</h2>
+		    <button type="submit" id="add_equipment" class="btn btn-success btn-info">Προσθήκη Εξαρτήματος</button>
+	        <button type="submit" id="modify_equipment"class="btn btn-primary btn-danger">Διαγραφή / Τροποποίηση Εξαρτήματος</button>
 	
 		';
 	} else {
 		header("Location: index.php");
 	}
-	include("footer.php");
+	include("views/footer.php");
 ?>

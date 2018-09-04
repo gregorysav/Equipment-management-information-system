@@ -1,8 +1,8 @@
 <?php
 	session_start();
-	include("connection.php");
-	include("header.php");
-	include("navbar.php");
+	include("views/connection.php");
+	include("views/header.php");
+	include("views/navbar.php");
 
 
 	if (array_key_exists("logout", $_GET)){
@@ -19,15 +19,30 @@
 					$equipQuery = $db->prepare("SELECT * FROM equip_svds"); 
  					$equipQuery->execute();
 
-     				echo "ID / Onoma / Etos Agoras / Idioktitis / Tmima / Paroxos / Diathesimotita / Sxolia / Posotita / Aposirthike / Perigrafi / Topothesia / Seiriakos Arithmos <br>";
+ 					echo '
+ 					<div class="alert alert-light" role="alert">
+						Όνομα Έτος Απόκτησης Όνομα Κατόχου Ποσότητα Τοποθεσία Σειριακός Αριθμός';
+
 				    while($result=$equipQuery->fetch(PDO::FETCH_ASSOC)){
 
-				   echo $result['id_equip'].' '.$result['name_e'].' '.$result['buy_method_e'].'  '.$result['buy_year_e'].' '.$result['owner_name'].' '.$result['department'].' '.$result['provider_e'].' '.$result['isborrowed'].' '.$result['comment_e'].' '.$result['quantity'].' '.$result['retired'].' '.$result['short_desc_e'].' '.$result['location_e'].' '.$result['serial_number'];
-               	    echo '
-               	    	<button id="delete" name ="delete" type="submit"><a href=delete_page.php?id_equip='.$result['id_equip'].'>Delete</a></button>';
+				    echo '
+				    <div class="alert alert-info" role="alert"><img src="uploadedImages/'.$result['real_filename'].'"/>Ta stoixeia einai '.$result['name_e'].' '.$result['buy_year_e'].' '.$result['owner_name'].' '.$result['quantity'].' '.$result['location_e'].' '.$result['serial_number'].'
+				     '.$result['serial_number'].' 
+					</div>						    	
+					';
+						
 
-               	    	echo '
-               	    	<button id="modify" name ="modify" type="submit"><a href=equipment_modify.php?id_equip='.$result['id_equip'].'>Modify</a></button>  <br>	
+				  
+               	    echo '
+               	    	<button id="delete" name ="delete" type="submit"><a href=equipment_delete.php?id_equip='.$result['id_equip'].'>Διαγραφή</a></button>';
+
+               	   	echo '
+               	   		<button id="modify" name ="modify" type="submit"><a href=equipment_modify.php?id_equip='.$result['id_equip'].'>Τροποποίηση</a></button> 	
+               	    
+               	    ';
+
+               	    echo '
+               	    	<button id="addImage" name ="addImage" type="submit"><a href=addImage.php?id_equip='.$result['id_equip'].'>Εισαγωγή Εικόνας</a></button>  <br>	
                	    
                	    ';
 		    
@@ -47,6 +62,7 @@
  // $array= explode($get, paseid )
  // $id= $array[1]
 
-include("footer.php");
+include("views/footer.php");
 
 ?>
+

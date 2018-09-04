@@ -1,8 +1,8 @@
 <?php
 session_start();
-	include("connection.php");
-	include("header.php");
-	include("navbar.php");
+	include("views/connection.php");
+	include("views/header.php");
+	include("views/navbar.php");
 
 
 	if (array_key_exists("logout", $_GET)){
@@ -86,7 +86,7 @@ session_start();
 			$equipQuery_stmt->execute();
 			$result=$equipQuery_stmt->fetch(PDO::FETCH_ASSOC);
 
-		   	echo "New records created successfully";
+		   	echo '<a class="p-3 mb-2 bg-success text-white">Επιτυχείς καταχώρηση αποτελεσμάτων</a>';
 		    
 		    
 		}
@@ -100,131 +100,114 @@ session_start();
 	}
 
 
-
-
-
-		
-		
-	
-
-	
-
-
-include("footer.php");
+include("views/footer.php");
 
 ?>
 
 <!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-</head>
-<body>
+			<html>
+			<head>
+				<title></title>
+			</head>
+			<body>
 
 
-	<div class="container">
-		<form method="post">
-			<div class="row">
-			    <div class="col-md-4">
-			        <h2>Equipment Information</h2>
-		       		<div class="form-group">
-					    <label for="name_e">Equipment Name:</label>
-					    <input type="text" class="form-control" id="name_e" name="name_e" placeholder="Equipment Name" required>
+				<div class="container">
+					<form method="post">
+						<div class="row">
+						    <div class="col-md-4">
+						        <h2>Προσθήκη Πληροφοριών</h2>
+					       		<div class="form-group">
+								    <label for="name_e">Όνομα Εξαρτήματος:</label>
+								    <input type="text" class="form-control" id="name_e" name="name_e" placeholder="Όνομα Εξαρτήματος" required>
 
-					    <label for="buy_method_e">Buy Method:</label>
-					    <input type="text" class="form-control" id="buy_method_e" name="buy_method_e" placeholder="Buy method" required>
+								    <label for="buy_method_e">Τρόπος Απόκτησης:</label>
+								    <input type="text" class="form-control" id="buy_method_e" name="buy_method_e" placeholder="Τρόπος Απόκτησης" required>
 
-					    <label for="buy_year_e">Buy Year:</label>
-					    <input type="text" class="form-control" id="buy_year_e" name="buy_year_e" placeholder="Buy year" required>
+								    <label for="buy_year_e">Έτος Απόκτησης:</label>
+								    <input type="text" class="form-control" id="buy_year_e" name="buy_year_e" placeholder="Έτος Απόκτησης" required>
 
-					    <label for="owner_name">Owner Name:</label>
-					    <input type="text" class="form-control" id="owner_name" name="owner_name" placeholder="Owner Name" required>
+								    <label for="owner_name">Όνομα Κατόχου:</label>
+								    <input type="text" class="form-control" id="owner_name" name="owner_name" placeholder="Όνομα Κατόχου" required>
 
-					    <label for="isborrowed">Is Borrowed:</label>
-					    <input type="text" class="form-control" id="isborrowed" name="isborrowed" placeholder="Insert 1 if is borrowed" required>
+								    <label for="isborrowed">Διαθεσιμότητα Δανεισμού:</label>
+								    <input type="text" class="form-control" id="isborrowed" name="isborrowed" placeholder="Εισάγετε 1 εάν είναι δανεισμένο" required>
 
-					    <label for="quantity">Quantity:</label>
-					    <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Quantity" required>
+								    <label for="quantity">Ποσότητα:</label>
+								    <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Ποσότητα" required>
 
-					    <label for="retired">Condition:</label>
-					    <input type="text" class="form-control" id="retired" name="retired" placeholder="Insert 1 if is retired" required>
+								    <label for="retired">Κατάσταση Απόσυρσης:</label>
+								    <input type="text" class="form-control" id="retired" name="retired" placeholder="Εισάγετε 1 εάν έχει αποσυρθεί" required>
 
-					    <label for="location_e">Location:</label>
-					    <input type="text" class="form-control" id="location_e" name="location_e" placeholder="Location Name" required>
+								    <label for="location_e">Τοποθεσία:</label>
+								    <input type="text" class="form-control" id="location_e" name="location_e" placeholder="Τοποθεσία" required>
 
-					    <label for="serial_number">Serial Number:</label>
-					    <input type="text" class="form-control" id="serial_number" name="serial_number" placeholder="Serial Number" required>
-					   
+								    <label for="serial_number">Σειριακός Αριθμός:</label>
+								    <input type="text" class="form-control" id="serial_number" name="serial_number" placeholder="Σειριακός Αριθμός" required>
+								   
+								</div>
+						    </div>
+						    <div class="col-md-4">
+						        <h2>Πληροφορίες Παρόχου</h2>
+
+								<div class="form-group">	
+								<label for="name_p">Όνομα Παρόχου:</label>
+								<input type="text" class="form-control" id="name_p" name="name_p" required>
+
+
+								<label for="telephone_p">Τηλέφωνο Παρόχου:</label>
+								<input type="text" class="form-control" id="telephone_p" name="telephone_p" required>
+
+								<label for="website_p">Ιστοσελίδα Παρόχου:</label>
+								<input type="text" class="form-control" id="website_p" name="website_p" required>
+
+
+								<label for="email_p">Email Παρόχου:</label>
+								<input type="email" class="form-control" id="email_p" name="email_p" required>
+
+
+								<label for="support_p">Υποστήριξη Παρόχου:</label>
+								<input type="text" class="form-control" id="support_p" name="support_p" required>
+
+
+								<label for="comments_p">Σχόλια Παρόχου:</label>
+								<input type="text" class="form-control" id="comments_p" name="comments_p" required>								
+
+								</div> 
+						    </div>
+
+			                <div class="col-md-4">
+						  		<h2>Πληροφορίες Τμήματος</h2>
+			                    <div class="form-group">
+								<label for="name_dep">Όνομα Τμήματος:</label>
+								<input type="text" class="form-control" id="name_dep" name="name_dep" placeholder="Όνομα Τμήματος" required>
+
+
+								<label for="telephone_dep">Τηλέφωνο Τμήματος:</label>
+								<input type="text" class="form-control" id="telephone_dep" name="telephone_dep" placeholder="Τηλέφωνο Τμήματος" required>
+
+								<h2>Περιγραφή</h2>
+
+								<label for="short_desc">Σύντομη Περιγραφή:</label>
+								<input type="text" class="form-control" id="short_desc" name="short_desc" placeholder="Δώστε σύντομη περιγραφή" required>
+
+								<label for="long_desc">Εκτενείς Περιγραφή:</label>
+								<input type="text" class="form-control" id="long_desc" name="long_desc" placeholder="Δώστε περισσότερες λεπτομέριες" >
+
+								<h2>Επιπλέον Σχόλια</h2>
+
+								<label for="comments">Σχόλια:</label>
+								<input type="text" class="form-control" id="comments" name="comments" placeholder="Αφήστε το σχόλιο σας" required>
+								</div>
+
+						    </div>
+						</div>
+
+						<button name ="add" type="submit" class="btn btn-primary">Προσθήκη Εξαρτήματος</button>
+					</form>
 					</div>
-			    </div>
-			    <div class="col-md-4">
-			        <h2>Provider Information</h2>
-
-					<div class="form-group">	
-					<label for="name_p">Provider Name:</label>
-					<input type="text" class="form-control" id="name_p" name="name_p" required>
-
-
-					<label for="telephone_p">Provider Telephone:</label>
-					<input type="text" class="form-control" id="telephone_p" name="telephone_p" required>
-
-					<label for="website_p">Provider Website:</label>
-					<input type="text" class="form-control" id="website_p" name="website_p" required>
-
-
-					<label for="email_p">Provider Email:</label>
-					<input type="email" class="form-control" id="email_p" name="email_p" required>
-
-
-					<label for="support_p">Provider Support:</label>
-					<input type="text" class="form-control" id="support_p" name="support_p" required>
-
-
-					<label for="comments_p">Provider Comments:</label>
-					<input type="text" class="form-control" id="comments_p" name="comments_p" required>
-
-					<!-- <form>
-					  <div class="form-group">
-					    <label for="real_filename">Equipment Image:</label>
-					    <input type="file" class="form-control-file" id="real_filename" name="real_filename">
-					  </div>
-					</form> -->
-
-					</div> 
-			    </div>
-
-                <div class="col-md-4">
-			  		<h2>Department Information</h2>
-                    <div class="form-group">
-					<label for="name_dep">Department Name:</label>
-					<input type="text" class="form-control" id="name_dep" name="name_dep" placeholder="Department Name" required>
-
-
-					<label for="telephone_dep">Department Telephone:</label>
-					<input type="text" class="form-control" id="telephone_dep" name="telephone_dep" placeholder="Department Name" required>
-
-					<h2>Description Information</h2>
-
-					<label for="short_desc">Short description:</label>
-					<input type="text" class="form-control" id="short_desc" name="short_desc" placeholder="Give short description" required>
-
-					<label for="long_desc">Long description:</label>
-					<input type="text" class="form-control" id="long_desc" name="long_desc" placeholder="Give long description" required>
-
-					<h2>Extra Comments</h2>
-
-					<label for="comments">Short description:</label>
-					<input type="text" class="form-control" id="comments" name="comments" placeholder="Leave a comment" required>
-					</div>
-
-			    </div>
-			</div>
-
-			<button name ="add" type="submit" class="btn btn-primary">Add Equipment</button>
-		</form>
-		</div>
 
 
 
-</body>
-</html>
+			</body>
+			</html>
