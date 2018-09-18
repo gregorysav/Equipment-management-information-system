@@ -207,7 +207,5 @@ include("views/footer.php");
 					</form>
 					</div>
 
-
-
-			</body>
-			</html>
+</body>
+</html>

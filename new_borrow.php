@@ -5,11 +5,11 @@
 	include("views/navbar.php");
 	if ($_SESSION['email']){
 
-	
+			$userId= $_SESSION['id'];
 			$equipQuery = $db->prepare("SELECT * FROM equip_svds"); 
 	 		$equipQuery->execute();
 
-	 		$borrowQuery = $db->prepare("SELECT * FROM borrow_svds"); 
+	 		$borrowQuery = $db->prepare("SELECT * FROM borrow_svds WHERE aem_borrow= $userId"); 
 	 		$borrowQuery->execute();
 
 } else {
@@ -29,27 +29,60 @@
 
 	<div class="container">
 		<div class="row">
-		  <div class="col-md-8"> <?php 
-		  			while($equip_result=$equipQuery->fetch(PDO::FETCH_ASSOC)){
-		  				if ($equip_result['isborrowed'] == 0 && $equip_result['retired'] == 0 ) {
+			<div class="col-md-4"> 
+		  	<h2>Ενεργοί δανεισμοί: </h2>
+		  	<?php 
+		  			while($borrow_result=$borrowQuery->fetch(PDO::FETCH_ASSOC)){
+		  				$idEquipBorrow = $borrow_result['id_equip_borrow'];
+					  	$equipBasketQuery = $db->prepare("SELECT * FROM equip_svds WHERE id_equip= $idEquipBorrow"); 
+						$equipBasketQuery->execute();
+						$equipBasketQueryResult= $equipBasketQuery->fetch(PDO::FETCH_ASSOC);
 
-								 echo '<div class="row" style="padding:2px"><div class="col-md-2">'.$equip_result['id_equip'].'</div><div class="col-md-2"><img src="uploadedImages/'.$equip_result['real_filename'].'"/></div><div class="col-md-2">'.$equip_result['owner_name'].'</div><div class="col-md-2">'.$equip_result['name_e'].'</div><div class="col-md-2"><button type="submit" class="btn btn-primary add_to_basket"  id_equip_borrow='.$equip_result['id_equip'].'
-								  aem_borrow='.$_SESSION['aem'].'>Καλάθι</button></div></div>';
+					  				echo '<p style="padding-left: 50px;">'.$equipBasketQueryResult['name_e'].'</p>';
+		  				
+
+		  			}
+		   ?> 
+		  <br><br>
+		  <button class="btn btn-dark" id="clear" aem_borrow="<?php echo $_SESSION['id']; ?>">Καθαρισμός</button>
+		  <button class="btn btn-dark" id="finish"><a href=finish.php style="color: black">Ολοκλήρωση</a></button>
+
+		    </div>
+		  	<div class="col-md-8">
+		  		<h2>Επιλέξτε από τα παρακάτω εξαρτήματα: </h2>
+		
+		  			<?php 
+		  		echo '
+ 						<table class="table table-bordered">
+						  <thead class="thead-dark">
+						    <tr>
+						      <th scope="col">Εικόνα</th>
+						      <th scope="col">Όνομα</th>
+						      <th scope="col">Ιδιοκτήτης</th>
+						      <th scope="col">Ποσότητα</th>
+						      <th scope="col">Ενέργειες</th>
+						    </tr>
+						  </thead>
+						  ';
+
+		  			while($equipQueryResult=$equipQuery->fetch(PDO::FETCH_ASSOC)){
+		  					if ($equipQueryResult['isborrowed'] == 0 && $equipQueryResult['retired'] == 0 && $equipQueryResult['quantity'] > 0) {
+		  					echo '
+ 						  <tbody>
+					      <td><img src="uploadedImages/'.$equipQueryResult['real_filename'].'"/></td>
+					      <td>'.$equipQueryResult['name_e'].'</td>
+					      <td>'.$equipQueryResult['owner_name'].'</td>
+					      <td>'.$equipQueryResult['quantity'].'</td>
+					      <td><button type="submit" class="btn btn-primary add_to_basket"  id_equip_borrow='.$equipQueryResult['id_equip'].' aem_borrow='.$_SESSION['id'].'>Καλάθι</button></td></div>
+					       ';
+
+								
 							}
 						}
 
-		   ?> </div>
-		  
-		  <div class="col-md-4"> <?php echo "To kalathi moy<br>";
-		  			while($borrow_result=$borrowQuery->fetch(PDO::FETCH_ASSOC)){
-		  				echo $borrow_result['aem_borrow'].'<br>';
-		  				echo $borrow_result['id_equip_borrow'].'<br>';
-		  				echo $borrow_result['isborrowed'].'<br>';
-		  			}
-		   ?> </div>
-		  <br><br>
-		  <button class="btn btn-primary">Καθαρισμός</button>
-		  <button class="btn btn-primary">Ολοκλήρωση</button>
+		    ?>
+		    </div>
+        
 		</div>
 	</div>	
 
@@ -60,3 +93,6 @@
 <?php
 include("views/footer.php");
 ?>		
+
+
+

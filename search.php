@@ -4,22 +4,12 @@
 	include("views/header.php");
 	include("views/navbar.php");
 
-	if(isset($_GET['q'])){
-
+	$userId= $_SESSION['id'];
+	
+	$borrowQuery = $db->prepare("SELECT * FROM borrow_svds WHERE aem_borrow= $userId"); 
+	$borrowQuery->execute();
 	 
-	 $searchTerm = $_GET['q'];
-            
-	 $Query = "SELECT * FROM equip_svds WHERE name_e LIKE '%$searchTerm%'";  
-	 $Query_stmt = $db->prepare($Query);
-	 $Query_stmt->execute();
-	 $result=$Query_stmt->fetch(PDO::FETCH_ASSOC);
 
-	 if ($result > 0){
-	 echo $result['id_equip'].' '.$result['name_e'].' '.$result['buy_method_e'].'  '.$result['buy_year_e'].' '.$result['owner_name'].' '.$result['department'].' '.$result['provider_e'].' '.$result['isborrowed'].' '.$result['comment_e'].' '.$result['quantity'].' '.$result['retired'].' '.$result['short_desc_e'].' '.$result['location_e'].' '.$result['serial_number'];
-	} else echo "No matches for that query";
-	}
-
-	include("views/footer.php");
 ?>
 
 <!DOCTYPE html>
@@ -29,20 +19,80 @@
 </head>
 <body>
 
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4"> 
+		  	<h2>Ενεργοί δανεισμοί: </h2>
+					  	<?php 
+					  				while($borrow_result=$borrowQuery->fetch(PDO::FETCH_ASSOC)){
+					  				$idEquipBorrow = $borrow_result['id_equip_borrow'];
+					  				$equipBasketQuery = $db->prepare("SELECT * FROM equip_svds WHERE id_equip= $idEquipBorrow"); 
+							 		$equipBasketQuery->execute();
+							 		$equipBasketQueryResult= $equipBasketQuery->fetch(PDO::FETCH_ASSOC);
 
+					  				echo '<p style="padding-left: 50px;">'.$equipBasketQueryResult['name_e'].'</p>';
+					  			}
+					   ?> 
+					  <br><br>
+					  <button class="btn btn-dark" id="clear" aem_borrow="<?php echo $_SESSION['id']; ?>">Καθαρισμός</button>
+					  <button class="btn btn-dark" id="finish"><a href=finish.php style="color: black">Ολοκλήρωση</a></button>
 
-	        
-	        <h2>Αναζήτηση Εξαρτημάτων</h2>
-	        
-	        
-	<form class="form-inline">
-	  <div class="form-group">
-	    <input type="text" name="q" class="form-control" id="search" placeholder="Όνομα Εξαρτήματος">
-	  </div>
-	  <button type="submit" class="btn btn-primary">Αναζήτηση</button>
-	</form>
+					    </div>
+		    <div class="col-md-8">
+		  		<h2>Αναζήτηση Εξαρτημάτων</h2>	        
+				<form class="form-inline">
+				  <div class="form-group">
+				    <input type="text" name="q" class="form-control" id="search" placeholder="Όνομα Εξαρτήματος">
+				  </div>
+				  <button type="submit" class="btn btn-primary">Αναζήτηση</button>
+				</form>
+		    
+		  	
+		    <?php
+		    	if(isset($_GET['q'])){
+ 
+				 $searchTerm = $_GET['q'];            
+				 $searchQuery = "SELECT * FROM equip_svds WHERE name_e LIKE '%$searchTerm%'";  
+				 $searchQuery_stmt = $db->prepare($searchQuery);
+				 $searchQuery_stmt->execute();
+				 $searchQueryResult=$searchQuery_stmt->fetch(PDO::FETCH_ASSOC);
+
+		    	if ($searchQueryResult){
+
+			 
+		  		echo '
+ 						<table class="table table-bordered">
+						  <thead class="thead-dark">
+						    <tr>
+						      <th scope="col">Εικόνα</th> 	
+						      <th scope="col">ID Καταχώρησης</th>
+						      <th scope="col">Ιδιοκτήτης</th>
+						      <th scope="col">Ποσότητα</th>
+						      <th scope="col">Ενέργειες</th>
+						    </tr>
+						  </thead>
+						  ';
+
+		  			
+		  					echo '
+ 						  <tbody>
+ 						  <td><img src="uploadedImages/'.$searchQueryResult['real_filename'].'"/></td>
+					      <td>'.$searchQueryResult['id_equip'].'</td>
+					      <td>'.$searchQueryResult['owner_name'].'</td>
+					      <td>'.$searchQueryResult['quantity'].'</td>
+					      <td><button type="submit" class="btn btn-primary add_to_basket" id_equip_borrow='.$searchQueryResult['id_equip'].' aem_borrow='.$_SESSION['id'].'>Καλάθι</button></td></div>
+					       ';
+		    
+				} else echo "Προέκυψε λάθος. Δοκιμάστε ξανά.";
+				} ?>
+        	</div>
+		</div>
+	</div>	
 
 
 </body>
 </html>
 
+<?php
+include("views/footer.php");
+?>

@@ -30,11 +30,13 @@ include("views/footer.php");
 <html>
 <body>
 
-<form action="upload.php?id_equip=<?php echo $idToChange; ?>" method="post" enctype="multipart/form-data">
-    Επιλέξτε εικόνα για ανέβασμα:
-    <input type="file" name="filename" id="filename"><br>
-    <input type="submit" id="imageUpload" value="Ανεβάστε Εικόνα" name="submit">
-</form>
+	<div class="container">
+		<form action="upload.php?id_equip=<?php echo $idToChange; ?>" method="post" enctype="multipart/form-data">
+		    Επιλέξτε εικόνα για ανέβασμα:
+		    <input type="file" name="filename" id="filename"><br>
+		    <input type="submit" id="imageUpload" value="Ανεβάστε Εικόνα" name="submit">
+		</form>
+	</div>	
 
 </body>
 </html>

@@ -26,7 +26,7 @@ include("views/connection.php");
       $_SESSION['password'] = $_POST['password'];
     	header("Location: index.php");     
 	} else {
-		echo '<p class="p-3 mb-2 bg-danger text-white">Πρόβλημα εισόδου. Δοκιμάστε σε λίγο.</p>';
+		echo '<div class="container"><div class="p-3 mb-2 bg-danger text-white">Πρόβλημα εισόδου. Παρακαλώ εισάγετε τα σωστά στοιχεία.</div></div>';
 	} 
 
 

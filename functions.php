@@ -3,9 +3,8 @@ session_start();
 include("views/connection.php");
 
     
-if ($_GET["function"] == "borrow") {
+if (isset($_GET) && ! empty($_GET) && $_GET["function"] == "borrow") {
 
-	echo $_POST["aem_borrow"];
 
     if ($_SESSION['email']){
 
@@ -23,8 +22,15 @@ if ($_GET["function"] == "borrow") {
         }
 }
 
-
-
-
+if (isset($_GET) && ! empty($_GET) && $_GET["function"] == "clear") {
+         
+         $idToDelete = $_POST['aem_borrow'];
+         $deleteQuery = "DELETE  FROM borrow_svds WHERE aem_borrow =  $idToDelete";
+         $deleteQuery_stmt = $db->prepare($deleteQuery);
+         $deleteQuery_stmt->bindParam(':aem_borrow', $idToDelete, PDO::PARAM_INT);
+         $deleteQuery_stmt->execute();
+                 
+         
+     }
 
 ?>     
