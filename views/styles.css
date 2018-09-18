@@ -1,0 +1,48 @@
+#logInForm {
+      text-align: center;
+      width: 400px;
+      margin-top: 100px;
+}
+
+.message {
+
+	 text-align: center;
+     width: 400px;
+
+}
+
+.equipment {
+	width: 100px;
+}
+
+img{
+	width: 150px;
+	height: 150px;
+	float: left;
+	margin: 1.66%;
+	background-color: white;
+}
+
+#uowmicon{
+	width: 20%;
+	height: 15%;
+	float: left;
+	margin: 1.66%;
+	background-color: white;
+}
+
+#welcome {
+	height: 15%;
+	padding: 60px;
+	font-size: 30px;
+}
+
+
+.caption {
+	padding-left: 70px;
+	margin-top: 5px;
+}
+
+div p { 
+    color: black;
+}
