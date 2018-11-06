@@ -15,11 +15,6 @@ session_start();
 	}	
 	
 	$idToChange=$_GET['id_equip'];	
-	
-	
-
-
-include("views/footer.php");
 
 ?>
 
@@ -41,3 +36,6 @@ include("views/footer.php");
 </body>
 </html>
 
+<?php
+	include("views/footer.php");
+?>

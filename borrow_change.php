@@ -7,6 +7,7 @@
 
 			$idToChange = $_GET['id_borrow'];
 			$userToBorrow = $_SESSION['id'];
+			$zero = 0;
 			
 		$userQueryBorrow = $db->prepare("SELECT * FROM users_svds WHERE id = $userToBorrow"); 
 	 		$userQueryBorrow->execute();
@@ -35,26 +36,18 @@
 	 		$findEndDate = $_POST['endDate'];
 	 		$end = date_create($findEndDate);
 	 		$daysToEnd = date_diff($start,$end)->format('%a');
-	 		$finishBorrow = $db->prepare("UPDATE borrow_svds SET start_date= :start_date, expire_date= :expire_date, isborrowed= :isborrowed, notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE id_borrow= $idToChange");
+	 		$finishBorrow = $db->prepare("UPDATE borrow_svds SET start_date= :start_date, expire_date= :expire_date, isborrowed= :isborrowed, notify30= :notify30, notify20= :notify20, notify10= :notify10, confirmation_borrow= :confirmation_borrow WHERE id_borrow= $idToChange");
 	 		$finishBorrow->bindParam(':start_date', $_POST['startDate']);
 		    $finishBorrow->bindParam(':expire_date', $_POST['endDate']);
-		    $finishBorrow->bindParam(':isborrowed', $one);
+		    $finishBorrow->bindParam(':isborrowed', $zero);
 		    $finishBorrow->bindParam(':notify30', $daysToEnd);
 		    $finishBorrow->bindParam(':notify20', $daysToEnd);
 		    $finishBorrow->bindParam(':notify10', $daysToEnd);
+		    $finishBorrow->bindParam(':confirmation_borrow', $zero);
 		    $finishBorrow->execute();
 
-		    // $emailTo = "icte@uowm.gr";
-      //       $subject = "Αν δουλεύει το site";
-      //       $message = "Ολα οκ";
-      //       $headers = "From: .$userToBorrowName";
-            
-      //           if (mail($emailTo, $subject, $message, $headers)) {
-                
-      //                $successMessage = '<div class="alert alert-success">Το μήνυμά σας έχει σταλθεί επιτυχώς, θα επικοινωνήσουμε μαζί σας σύντομα!</div>';
-      //            }
-
 		    	echo '<a class="p-3 mb-2 bg-success text-white">Επιτυχείς καταχώρηση αποτελεσμάτων</a>';
+		    	header("Location: active.php");
 		    	 	
 
 	 	}
@@ -71,7 +64,6 @@
 		header("Location: index.php");
 	}
 
-	include("views/footer.php");
 ?>		
 
 <!DOCTYPE html>
@@ -99,7 +91,7 @@
 				  </div>
 				  <div class="form-group">
 				    <label for="startDate">Ημερομηνία έναρξης: </label><br>
-				    <input type="date" id="startDate "name="startDate" min="2000-01-02">
+				    <input type="date" id="startDate" value="<?php  echo date('Y-m-d'); ?>" name="startDate" min="2000-01-02">
 				  </div>
 				  <div class="form-group">
 				    <label for="endDate">Ημερομηνία λήξης: </label><br>
@@ -117,3 +109,7 @@
 
 </body>
 </html>
+
+<?php
+	include("views/footer.php");
+?>

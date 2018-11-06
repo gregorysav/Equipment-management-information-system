@@ -11,7 +11,7 @@
 	$deleteQuery_stmt->bindParam(':id_borrow', $idToDelete, PDO::PARAM_INT);
 	$deleteQuery_stmt->execute();
 
-	header("Location: active_borrows.php");
+	header("Location: active.php");
 
 
 	include("views/footer.php");

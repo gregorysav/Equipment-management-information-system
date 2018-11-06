@@ -1,7 +1,9 @@
 <div class="container">	
 	<nav class="navbar navbar-dark bg-dark" style="background-color: black;">
-			  <a class="navbar-brand" href="index.php">Αρχική Σελίδα</a>
 			  <ul class="nav navbar-nav">
+			    <li class="nav-item">
+			      <a class="nav-link" href="index.php">Αρχική Σελίδα</a>
+			    </li>
 			    <li class="nav-item">
 			      <a class="nav-link" href="account.php">Προφίλ</a>
 			    </li>
@@ -14,6 +16,11 @@
 			    <li class="nav-item">
 			      <a class="nav-link" href="search.php">Αναζήτηση</a>
 			    </li>
+			    <?php if ($_SESSION['type'] == 1) {?>
+			    <li class="nav-item">
+			      <a class="nav-link" href="confirmation.php">Επιβεβαίωση Δανεισμών</a>
+			    </li>
+				<?php } ?>
 			  </ul>
 			  <div class="form-inline pull-xs-right">
 			  	<a href="account.php" class="btn btn-outline-light my-2 my-sm-0">Hi, <?php echo $_SESSION['first_name']; ?></a>

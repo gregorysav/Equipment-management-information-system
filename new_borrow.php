@@ -15,8 +15,9 @@
 } else {
 		header("Location: index.php");
 	}
-	
+
 ?>		
+
 
 <!DOCTYPE html>
 <html>
@@ -30,18 +31,13 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4"> 
-		  	<h2>Ενεργοί δανεισμοί: </h2>
+		  	<h2>Καλάθι: </h2>
 		  	<?php 
-		  			while($borrow_result=$borrowQuery->fetch(PDO::FETCH_ASSOC)){
-		  				$idEquipBorrow = $borrow_result['id_equip_borrow'];
-					  	$equipBasketQuery = $db->prepare("SELECT * FROM equip_svds WHERE id_equip= $idEquipBorrow"); 
-						$equipBasketQuery->execute();
-						$equipBasketQueryResult= $equipBasketQuery->fetch(PDO::FETCH_ASSOC);
-
-					  				echo '<p style="padding-left: 50px;">'.$equipBasketQueryResult['name_e'].'</p>';
-		  				
-
-		  			}
+		  		$basketQuery = $db->prepare("SELECT * FROM basket_svds"); 
+	 			$basketQuery->execute();
+	 			while($basketQueryResult=$basketQuery->fetch(PDO::FETCH_ASSOC)){
+	 				echo $basketQueryResult['name_basket'].'<br>';
+	 				}
 		   ?> 
 		  <br><br>
 		  <button class="btn btn-dark" id="clear" aem_borrow="<?php echo $_SESSION['id']; ?>">Καθαρισμός</button>
@@ -73,7 +69,7 @@
 					      <td>'.$equipQueryResult['name_e'].'</td>
 					      <td>'.$equipQueryResult['owner_name'].'</td>
 					      <td>'.$equipQueryResult['quantity'].'</td>
-					      <td><button type="submit" class="btn btn-primary add_to_basket"  id_equip_borrow='.$equipQueryResult['id_equip'].' aem_borrow='.$_SESSION['id'].'>Καλάθι</button></td></div>
+					      <td><button type="submit" class="btn btn-primary add_to_basket"  name_basket='.$equipQueryResult['name_e'].' id_equip_basket='.$equipQueryResult['id_equip'].' >Καλάθι</button></td></div>
 					       ';
 
 								
@@ -89,10 +85,6 @@
 </body>
 </html>
 
-
 <?php
-include("views/footer.php");
+	include("views/footer.php");
 ?>		
-
-
-

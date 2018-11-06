@@ -188,7 +188,7 @@
 								    <input type="text" class="form-control" id="name_dep" name="name_dep" value="'.$result['name_dep'].'" required>
 
 								    <label for="telephone_dep">Τηλέφωνο Τμήματος:</label>
-					<input type="text" class="form-control" id="telephone_dep" name="telephone_dep" placeholder="Department Name" value="'.$result['telephone_dep'].'" required>
+					<input type="text" class="form-control" id="telephone_dep" name="telephone_dep" value="'.$result['telephone_dep'].'" required>
 
 
 					<h2>Περιγραφή</h2>			    
@@ -208,9 +208,7 @@
 
 
 					      </div> 
-					      <h2>Εικόνα Εξαρτήματος</h2>	
-					      <label for="image">Ονομα Εικόνας:</label>
-					<input type="text" class="form-control" id="image" name="image" value="'.$_GET['file'].'" required>
+					      
 
 					</div>
 						       </div>

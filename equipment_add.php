@@ -99,9 +99,6 @@ session_start();
 
 	}
 
-
-include("views/footer.php");
-
 ?>
 
 <!DOCTYPE html>
@@ -209,3 +206,7 @@ include("views/footer.php");
 
 </body>
 </html>
+
+<?php
+	include("views/footer.php");
+?>

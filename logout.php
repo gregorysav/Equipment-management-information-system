@@ -6,7 +6,6 @@
 				
 		session_destroy();
 	}
-	include("views/footer.php");
 ?>
 
 <!DOCTYPE html>
@@ -30,3 +29,7 @@
 	</div>	
 </body>
 </html>
+
+<?php
+	include("views/footer.php");
+?>

@@ -67,7 +67,6 @@
   } else {
     header("Location: login.php");
   }
-  include("views/footer.php");
 ?>
 
 <!DOCTYPE html>
@@ -134,3 +133,6 @@
 </body>
 </html>
 
+<?php
+  include("views/footer.php");
+?>

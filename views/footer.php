@@ -38,7 +38,7 @@
 			$.ajax({
             type: "POST",
             url: "functions.php?function=borrow",
-            data: "aem_borrow=" + $(this).attr("aem_borrow") + "&id_equip_borrow=" + $(this).attr("id_equip_borrow") ,
+            data: "name_basket=" + $(this).attr("name_basket") + "&id_equip_basket=" + $(this).attr("id_equip_basket") ,
             success: function(result) {
                     window.location.reload();
                 }
@@ -62,6 +62,18 @@
 
 	$("#finish").click(function() {
 			window.location = "finish.php";
+	});
+	
+	$(".confirm").click(function() {
+			$.ajax({
+            type: "POST",
+            url: "functions.php?function=confirm",
+            data: "id_to_confirm=" + $(this).attr("id_to_confirm"),
+            success: function(result) {
+                    window.location.reload();
+                }
+                 
+           })
 	});	
 
 	
@@ -69,6 +81,5 @@
 	
 
 </script>
-      
 </body>
 </html>

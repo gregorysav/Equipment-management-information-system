@@ -19,7 +19,6 @@
 	} else {
 		header("Location: index.php");
 	}
-	include("views/footer.php");
 ?>
 <!DOCTYPE html>
 <html>
@@ -48,3 +47,7 @@
 
 </body>
 </html>
+
+<?php
+	include("views/footer.php");
+?>

@@ -6,8 +6,8 @@
 
 	$userId= $_SESSION['id'];
 	
-	$borrowQuery = $db->prepare("SELECT * FROM borrow_svds WHERE aem_borrow= $userId"); 
-	$borrowQuery->execute();
+	$basketQuery = $db->prepare("SELECT * FROM basket_svds"); 
+	$basketQuery->execute();
 	 
 
 ?>
@@ -24,8 +24,8 @@
 			<div class="col-md-4"> 
 		  	<h2>Ενεργοί δανεισμοί: </h2>
 					  	<?php 
-					  				while($borrow_result=$borrowQuery->fetch(PDO::FETCH_ASSOC)){
-					  				$idEquipBorrow = $borrow_result['id_equip_borrow'];
+					  				while($basket_result=$basketQuery->fetch(PDO::FETCH_ASSOC)){
+					  				$idEquipBorrow = $basket_result['id_equip_basket'];
 					  				$equipBasketQuery = $db->prepare("SELECT * FROM equip_svds WHERE id_equip= $idEquipBorrow"); 
 							 		$equipBasketQuery->execute();
 							 		$equipBasketQueryResult= $equipBasketQuery->fetch(PDO::FETCH_ASSOC);
@@ -80,7 +80,7 @@
 					      <td>'.$searchQueryResult['id_equip'].'</td>
 					      <td>'.$searchQueryResult['owner_name'].'</td>
 					      <td>'.$searchQueryResult['quantity'].'</td>
-					      <td><button type="submit" class="btn btn-primary add_to_basket" id_equip_borrow='.$searchQueryResult['id_equip'].' aem_borrow='.$_SESSION['id'].'>Καλάθι</button></td></div>
+					      <td><button type="submit" class="btn btn-primary add_to_basket" name_basket='.$searchQueryResult['name_e'].' id_equip_basket='.$searchQueryResult['id_equip'].'>Καλάθι</button></td></div>
 					       ';
 		    
 				} else echo "Προέκυψε λάθος. Δοκιμάστε ξανά.";

@@ -18,17 +18,11 @@
 	 		$userToBorrowLastName = $userQueryBorrowResult['last_name'];
 	 	}
 
-	 	$borrowQuery = $db->prepare("SELECT * FROM borrow_svds WHERE aem_borrow = $userToBorrow"); 
-	 	$borrowQuery->execute();
-	 	while($borrowQueryResult=$borrowQuery->fetch(PDO::FETCH_ASSOC)){
-	 			$idEquipToBorrow = $borrowQueryResult['id_equip_borrow'];
-
-			 	
-			 	$equipBorrowQuery = $db->prepare("SELECT * FROM equip_svds WHERE id_equip = $idEquipToBorrow");
-			 	$equipBorrowQuery->execute();
-			 	while($equipBorrowQueryResult=$equipBorrowQuery->fetch(PDO::FETCH_ASSOC)){
-			 			$equipNames[] = $equipBorrowQueryResult['name_e'];
-			 	} 
+	 	$basketQuery = $db->prepare("SELECT * FROM basket_svds"); 
+	 	$basketQuery->execute();
+	 	while($basketQueryResult=$basketQuery->fetch(PDO::FETCH_ASSOC)){
+	 			$equipNames[] = $basketQueryResult['name_basket'];
+			 	 
 	 	}
 
 
@@ -40,13 +34,15 @@
 	 		$findEndDate = $_POST['endDate'];
 	 		$end = date_create($findEndDate);
 	 		$daysToEnd = date_diff($start,$end)->format('%a');
-	 		$finishBorrow = $db->prepare("UPDATE borrow_svds SET start_date= :start_date, expire_date= :expire_date, isborrowed= :isborrowed, notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE aem_borrow= $userToBorrow");
+	 		$finishBorrow = $db->prepare("UPDATE borrow_svds  SET aem_borrow= :aem_borrow, start_date= :start_date, expire_date= :expire_date, isborrowed= :isborrowed, notify30= :notify30, notify20= :notify20, notify10= :notify10, confirmation_borrow= :confirmation_borrow WHERE isborrowed= $zero");
+	 		$finishBorrow->bindParam(':aem_borrow', $userToBorrow);
 	 		$finishBorrow->bindParam(':start_date', $_POST['startDate']);
 		    $finishBorrow->bindParam(':expire_date', $_POST['endDate']);
 		    $finishBorrow->bindParam(':isborrowed', $one);
 		    $finishBorrow->bindParam(':notify30', $daysToEnd);
 		    $finishBorrow->bindParam(':notify20', $daysToEnd);
 		    $finishBorrow->bindParam(':notify10', $daysToEnd);
+		    $finishBorrow->bindParam(':confirmation_borrow', $zero);
 		    $finishBorrow->execute();
 
 		    $borrowedItem = "";
@@ -76,17 +72,9 @@
 
 	 	}
 
-
-
-		    // $emailTo = "icte@uowm.gr";
-      //       $subject = "Αν δουλεύει το site";
-      //       $message = "Ολα οκ";
-      //       $headers = "From: .$userToBorrowName";
-            
-      //           if (mail($emailTo, $subject, $message, $headers)) {
-                
-      //                $successMessage = '<div class="alert alert-success">Το μήνυμά σας έχει σταλθεί επιτυχώς, θα επικοινωνήσουμε μαζί σας σύντομα!</div>';
-      //            }
+	 	$deleteQuery = "DELETE  FROM basket_svds";
+		$deleteQuery_stmt = $db->prepare($deleteQuery);
+		$deleteQuery_stmt->execute();
 
 		    	echo '<a class="p-3 mb-2 bg-success text-white">Επιτυχείς καταχώρηση αποτελεσμάτων</a>';
 		    	 	
@@ -96,7 +84,6 @@
 		header("Location: index.php");
 	}
 
-	include("views/footer.php");
 ?>		
 
 <!DOCTYPE html>
@@ -124,7 +111,7 @@
 				  </div>
 				  <div class="form-group">
 				    <label for="startDate">Ημερομηνία έναρξης: </label><br>
-				    <input type="date" id="startDate "name="startDate" min="2000-01-02">
+				    <input type="date" id="startDate" value="<?php echo date('Y-m-d'); ?>"name="startDate" min="2000-01-02">
 				  </div>
 				  <div class="form-group">
 				    <label for="endDate">Ημερομηνία λήξης: </label><br>
@@ -141,3 +128,7 @@
 
 </body>
 </html>
+
+<?php
+	include("views/footer.php");
+?>
