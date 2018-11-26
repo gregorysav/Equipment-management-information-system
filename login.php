@@ -1,5 +1,10 @@
 <?php
-session_start();
+if(!isset($_SESSION)) 
+{ 
+    session_start(); 
+}
+include("views/connection.php");
+include("views/header.php");
 if (array_key_exists("logout", $_GET)){
 	unset($_SESSION);
 } else if (array_key_exists("email", $_SESSION)){
@@ -10,20 +15,24 @@ if (array_key_exists("logout", $_GET)){
 if(isset($_POST['email'])){
 
 try{
-include("views/connection.php"); 
+ 
+    $logInQuerySQL = "SELECT * FROM users_svds WHERE email = :email AND password = :password"; 
+    $logInQuerySTMT = $db->prepare($logInQuerySQL);
+    $logInQuerySTMT->bindParam(':email', $_POST['email'], PDO::PARAM_INT);
+    $logInQuerySTMT->bindParam(':password', $_POST['password'], PDO::PARAM_INT); 
+    $logInQuerySTMT->execute();
 
-
-    $stmt = $db->prepare("SELECT * FROM users_svds WHERE email = :email AND password = :password"); 
-    $stmt->bindParam(':email', $_POST['email']);
-    $stmt->bindParam(':password', $_POST['password']);
-
-    $stmt->execute();
-
-
-     
-    if($result=$stmt->fetch(PDO::FETCH_ASSOC)){
-    	$_SESSION['email'] = $_POST['email'];
-      $_SESSION['password'] = $_POST['password'];
+    if($logInQuerySTMTResult=$logInQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+    	$_SESSION['email'] = $logInQuerySTMTResult['email'];
+    	$_SESSION['username'] = $logInQuerySTMTResult['username'];
+    	$_SESSION['aem'] = $logInQuerySTMTResult['aem'];
+    	$_SESSION['last_name'] = $logInQuerySTMTResult['last_name'];
+    	$_SESSION['first_name'] = $logInQuerySTMTResult['first_name'];
+    	$_SESSION['type'] = $logInQuerySTMTResult['type'];
+    	$_SESSION['telephone'] = $logInQuerySTMTResult['telephone'];
+    	$_SESSION['type'] = $logInQuerySTMTResult['type'];
+    	$_SESSION['id'] = $logInQuerySTMTResult['id'];
+    	$userID= $logInQuerySTMTResult['id'];
     	header("Location: index.php");     
 	} else {
 		echo '<div class="container"><div class="p-3 mb-2 bg-danger text-white">Πρόβλημα εισόδου. Παρακαλώ εισάγετε τα σωστά στοιχεία.</div></div>';
@@ -34,14 +43,14 @@ include("views/connection.php");
 
 }
 catch(PDOException $e)
-    {
-    echo "Error: " . $e->getMessage();
-    }
+{
+  echo "Error: " . $e->getMessage();
+}
 
 $db = null;
 
 }
- include("views/header.php"); 
+  
 
  	echo '
     <div id="logInForm" class="container">
@@ -56,7 +65,8 @@ $db = null;
           </div>
           <button name ="logout" value=1 type="submit" class="btn btn-primary">Σύνδεση</button>
         </form>
-    </div> '; 
+    </div> 
+  '; 
 
 
 include("views/footer.php"); 

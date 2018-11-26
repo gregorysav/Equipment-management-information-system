@@ -1,35 +1,27 @@
 <?php
-	session_start();
-	include("views/header.php");
-	if(isset($_SESSION['email'])){
-
-				
+include("views/header.php");
+	if(isset($_SESSION)){
 		session_destroy();
 	}
-?>
 
-<!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-</head>
-<body>
-
+echo '
 	<br><br><br>
 	<div class="container">
 		<div class="jumbotron">
-		  <img src="images/goodbyeicon.jpg">
-		  <p class="lead">Ευχαριστούμε που χρησιμοποιήσατε την ιστοσελίδα μας.</p>
-		  <hr class="my-4">
-		  <p>Σας περιμένουμε σύντομα ξανά κοντά μας.</p>
-		  <p class="lead">
-		    <a class="btn btn-primary btn-lg" href="index.php?logout=1" role="button">Συνδεθείτε Ξανά</a>
-		  </p>
+			<img src="images/goodbyeicon.jpg">
+			<div class="row">
+				<div class="col-md-8">
+				  	<p class="lead">Ευχαριστούμε που χρησιμοποιήσατε την ιστοσελίδα μας.</p>
+				  	<hr class="my-4">
+				  	<p>Σας περιμένουμε σύντομα ξανά κοντά μας.</p>
+				  	<p class="lead">
+				    <a class="btn btn-primary btn-lg" href="index.php?logout=1" role="button">Συνδεθείτε Ξανά</a>
+				  	</p>
+				<div>  	
+		  	</div>
 		</div>
 	</div>	
-</body>
-</html>
+';	
 
-<?php
-	include("views/footer.php");
+include("views/footer.php");
 ?>

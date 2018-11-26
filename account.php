@@ -1,53 +1,28 @@
 <?php
-	session_start();
-	include("views/header.php");
-	include("views/navbar.php");
+include("variables_file.php");
+include("views/header.php");
+include("views/navbar.php");
 	if ($_SESSION['email']){
-		$id = $_SESSION['id'];
-		$username = $_SESSION['email'];
-		$aem = $_SESSION['aem'];
-		$type = $_SESSION['type'];
-		$last_name = $_SESSION['last_name'];
-		$first_name = $_SESSION['first_name'];
-		$email = $_SESSION['email'];
-		$telephone = $_SESSION['telephone'];
-		$type = $_SESSION['type'];
-		$isA = "Σπουδαστής";
-		if ($type == 1) {
-			$isA = "Διδάσκοντας";
-		}
+		
 	} else {
 		header("Location: index.php");
 	}
-?>
-<!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-</head>
-<body>
-
-	
+echo '
 	<div class="container">
 		<h1>Προφίλ Χρήστη</h1>
 		<div class="jumbotron">
 			<div class="prof-info">
-
-			   <div class="info"><label><i class="fa fa-user"></i>Όνομα :</label>  <span><?php echo $first_name; ?></span></div>
-					   <div class="info"><label><i class="fa fa-user"></i>Επίθετο :</label>  <span><?php echo $last_name; ?></span></div>
-			   <div class="info"><label><i class="fa fa-calendar"></i>ΑΕΜ :</label>  <span><?php echo $aem; ?></span></div>
-			   <div class="info"><label><i class="fa fa-male"></i>Email :</label>  <span><?php echo $email; ?></span></div>
-			   <div class="info"><label><i class="fa fa-male"></i>Τηλέφωνο :</label>  <span><?php echo $telephone; ?></span></div>
-			   <div class="info"><label><i class="fa fa-male"></i>Ειδικότητα :</label>  <span><?php echo $isA; ?></span></div>
-			   
+			   <div class="info"><label> Όνομα :</label>  <span>'.$first_name.'</span></div>
+					   <div class="info"><label> Επίθετο :</label>  <span>'.$last_name.'</span></div>
+			   <div class="info"><label> ΑΕΜ :</label>  <span>'.$aem.'</span></div>
+			   <div class="info"><label> Email :</label>  <span>'.$email.'</span></div>
+			   <div class="info"><label> Τηλέφωνο :</label>  <span>'.$telephone.'</span></div>
+			   <div class="info"><label> Ειδικότητα :</label>  <span>'.$isA.'</span></div>
 			</div>
 		</div>	
 	</div>
 
+';
 
-</body>
-</html>
-
-<?php
-	include("views/footer.php");
+include("views/footer.php");
 ?>

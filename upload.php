@@ -1,4 +1,5 @@
 <?php
+include("variables_file.php");
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
@@ -33,11 +34,12 @@ include("views/navbar.php");
                 echo "Λυπούμαστε, το αρχείο δεν έχει ανέβει επιτυχώς.";
             } else {
                 if (move_uploaded_file($_FILES["filename"]["tmp_name"], $target_file)) {
-                    echo "Η εικόνα ανέβηκε με επιτυχία";
+                    echo '<div class="container">Η εικόνα ανέβηκε με επιτυχία</div>';
                     $realFilename = basename( $_FILES["filename"]["name"]);
                     echo '
-                        <button id="updateModify" name ="updateModify" type="submit"><a href=equipment_modify.php?id_equip='.$idToChange.'&file='.$realFilename.'>Τροποποίηση</a></button>     
-                    
+                        <div class="container">
+                        <button id="updateModify" name ="updateModify" type="submit"><a href=equipment_modify.php?id_equip='.$idToChange.'&file='.$realFilename.'>Ολοκλήρωση</a></button>     
+                        </div>
                     ';                    
                 } else {
                     echo "Παρουσιάστηκε πρόβλημα κατά το ανέβασμα της εικόνας.";

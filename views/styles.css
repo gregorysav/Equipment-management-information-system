@@ -1,3 +1,11 @@
+html {
+	height: 100%;
+}
+
+body {
+	position: relative;
+}
+
 #logInForm {
       text-align: center;
       width: 400px;
@@ -45,4 +53,196 @@ img{
 
 div p { 
     color: black;
+}
+
+.table {
+	width: 80%;
+	margin: 0 auto;
+}
+
+#confirmation {
+	border-style: double;
+}
+
+#borrowExplain {
+	width: 35%;
+}
+
+#basket {
+	width: 50%;
+	margin: 0 auto;
+}
+
+#basket_container {
+	text-align: center;
+	
+}
+
+#basket_buttons {
+	display: inline-block;
+}
+
+a:visited {
+	color: white; 
+}
+
+td a {
+	color: black; 
+}
+
+td a:visited {
+	color: black; 
+}
+
+button a {
+	color: white;
+}
+
+button a:visited {
+	color: white;
+}
+
+hr {
+    border: none;
+    height: 2px;
+    color: black;
+    background-color: black; 
+}
+
+#stateIconSuccess {
+	border: 0;
+	color: green;
+}
+
+#stateIconNoSuccess {
+	border: 0;
+	color: red;
+}	
+
+#searchHolder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#search {
+	width: 250px;
+}
+
+@media (max-width: 600px) {
+  .form-inline input {
+    margin: 5px 0;
+  }
+
+  .form-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  tr {
+  	font-size: 11px;
+  }
+
+  #indexPage img {
+  	width: 300px;
+  	height: 350;
+  	padding-left: 140px;
+  }
+
+  #welcome {
+  	font-size: 30px;
+  	padding-left: 80px;
+  }	
+
+  #indexPicture {
+  	display: flex;
+	align-items: center;
+	justify-content: center;
+  	align-content: center;
+  	
+  }
+
+  #footerMessage{
+	opacity: 0.0;
+  }
+}
+
+#footerMessage{
+	position: fixed;
+	font-size: 12px;
+	font-family: monospace;
+	letter-spacing: 1px;
+	padding-left: 25px;
+  	height:10px;
+  	right:auto;
+  	left:auto;
+  	bottom: 10px;
+}
+
+#footerMessage a:visited{
+	color: #337ab7;
+}
+
+#navbarButtons {
+	color: #fff;	
+	display: inline-block;
+}
+
+
+td img {
+	width: 75px;
+	height: 75px;
+}
+
+td {
+      text-align: center;
+      vertical-align: middle;
+}
+
+.add_to_basket {
+      text-align: center;
+      vertical-align: middle;
+}
+
+.jumbotron hr {
+	width: 100%;
+	margin: auto;
+}
+
+.pagination a{
+	font-size: 20px;
+	letter-spacing: 15px;
+	text-decoration: none;
+}
+
+.pagination a:visited {
+	color: #212529; 
+	padding: 25px;
+	text-decoration: none;
+}
+
+#imageUpload {
+	margin-top: 15px; 
+}
+
+#imageDelete {
+	margin-top: 15px; 
+}
+
+#filename {
+	margin-top: 20px; 
+}
+
+.equipmentDetailsImage {
+	width: 250px;
+	height: 230px;
+}
+
+#newComment {
+	visibility: hidden;
+}
+
+#commentArea {
+	width: 350px;
+	height: 100px;
 }

@@ -1,92 +1,94 @@
 <?php
-	session_start();
-	include("views/connection.php");
-	include("views/header.php");
-	include("views/navbar.php");
+include("variables_file.php");
+include("views/connection.php");
+include("views/header.php");
+include("views/navbar.php");
 	if ($_SESSION['email']){
 		echo '
 		<div class="container">
-		<h2>Ενεργοί Δανεισμοί</h2>
+		<h2>Οι Ενεργοί μου Δανεισμοί</h2>
 		</div>';
-
-
-
 
 	} else {
 		header("Location: index.php");
 	}
 	
-?>
-
-
-<!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-</head>
-<body>
-
-	<div class="container">
-		<div class="row">
+	echo '
+		<div class="container">
+			<div class="row">
+			<div class="col-md-4">
+				<div class="form-inline" id="searchHolder">
+				<button type="submit" id="new_borrow" class="btn btn-primary">Αίτηση Νέου Δανεισμού</button><br>
+				</div>
 			</div>
-		    <div class="col-md-4">
-		  		<h3>Δημιουργία δανεισμού</h3>
-		  		<button type="submit" id="new_borrow" class="btn btn-primary">Νέος Δανεισμός</button>
-		  	</div>
-			<div class="col-md-8"><?php 
-		  			$userToBorrow = $_SESSION['id'];
-		$today = date('d-m-Y');
-	    $start = date_create($today);
-		echo '
-			<div class="container">
- 						<table class="table table-bordered">
-						  <thead class="thead-dark">
-						    <tr>
-						      <th scope="col">Id Δανεισμού</th>
-						      <th scope="col">Όνομα Εξαρτήματος</th>
-						      <th scope="col">Ιδιοκτήτης</th>
-						      <th scope="col">Μέρες που απομένουν</th>
-						      <th scope="col">Ενέργεια</th>
-						    </tr>
-						  </thead>';
-		$borrowQuery = $db->prepare("SELECT * FROM borrow_svds WHERE aem_borrow = $userToBorrow"); 
-	 	$borrowQuery->execute();
-	 	while($borrowQueryResult=$borrowQuery->fetch(PDO::FETCH_ASSOC)){
-	 		$idEquipToBorrow = $borrowQueryResult['id_equip_borrow'];
-	 		$endDate = $borrowQueryResult['expire_date'];
-	 		$end = date_create($endDate);
-	 		$days = date_diff($start,$end)->format('%a');
-	 	$userQueryBorrow = $db->prepare("SELECT * FROM users_svds WHERE id = $userToBorrow"); 
-	 		$userQueryBorrow->execute();
-	 		while($userQueryBorrowResult=$userQueryBorrow->fetch(PDO::FETCH_ASSOC)){
-	 		$userToBorrowName = $userQueryBorrowResult['first_name'];
-	 		$userToBorrowLastName = $userQueryBorrowResult['last_name'];
-	 	}
-
-	 	$equipBorrowQuery = $db->prepare("SELECT * FROM equip_svds WHERE id_equip = $idEquipToBorrow");
-		$equipBorrowQuery->execute();
-		while($equipBorrowQueryResult=$equipBorrowQuery->fetch(PDO::FETCH_ASSOC)){
-			 			$equipName = $equipBorrowQueryResult['name_e'];
-			 			$equipOwnerName = $equipBorrowQueryResult['owner_name'];
-			 			
-		} 
-		  					echo '
- 						  <tbody>
-					      <td>'.$borrowQueryResult['id_borrow'].' </td>
-					      <td>'.$equipName.'</td>
-					      <td>'.$equipOwnerName.'</td>
-					      <td>'.$days.'</td>
-					      <td><button type="submit" class="btn btn-danger deleteBorrow" ><a href=borrow_delete.php?id_borrow='.$borrowQueryResult['id_borrow'].'>Κατάργηση</a></button><br><button type="submit" class="btn btn-success manageBorrow" ><a href=borrow_change.php?id_borrow='.$borrowQueryResult['id_borrow'].'>Τροποποίηση</a></button></td></div></div>
-					       ';
-
-		}?>
-			</div>		
+			<div class="col-md-8">
+	';
+	$userToBorrow = $_SESSION['aem'];
+	$borrowQuerySQL = "SELECT * FROM borrow_svds WHERE aem_borrow = :userToBorrow";
+	$borrowQuerySTMT = $db->prepare($borrowQuerySQL);
+	$borrowQuerySTMT-> bindParam(':userToBorrow', $userToBorrow, PDO::PARAM_INT); 
+	$borrowQuerySTMT->execute();	
+	echo '
+		<div class="container">
+	 		<table id="table" class="table table-bordered">
+		    <thead class="thead-dark">
+		    <tr>
+		   	<th scope="col">Εικόνα</th> 	
+			<th scope="col">Ονομασία</th>	
+			<th scope="col">Ημ. Έναρξης</th>
+			<th scope="col">Ημ. Λήξης</th>
+			<th scope="col"></th>
+		    </tr>
+		    </thead>
+	';
+	while ($borrowQuerySTMTResult=$borrowQuerySTMT->fetch(PDO::FETCH_ASSOC)) {
+		$borrowState = '<td id="stateIconSuccess" class="fa fa-check" title=Ενεργός></td>';
+		if ($borrowQuerySTMTResult['notify10'] <= 0){
+			$borrowState ='<td id="stateIconNoSuccess" class="fa fa-power-off" title="Ανενεργός"></td>';
+		}
+		$idEquipToBorrow = $borrowQuerySTMTResult['id_equip_borrow'];
+		$equipBorrowQuerySQL = "SELECT * FROM equip_svds WHERE id_equip = :idEquipToBorrow";
+		$equipBorrowQuerySTMT = $db->prepare($equipBorrowQuerySQL);
+		$equipBorrowQuerySTMT->bindParam(':idEquipToBorrow', $idEquipToBorrow, PDO::PARAM_INT);
+		$equipBorrowQuerySTMT->execute();
+		while($equipBorrowQuerySTMTResult=$equipBorrowQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+			$equipName = $equipBorrowQuerySTMTResult['name_e'];
+		}
+		if ($borrowQuerySTMTResult['confirmation_borrow'] == 0) {
+			echo '
+				<tbody>
+				<tr>
+				'.$borrowState.'			    
+	 			<td>'.$equipName.'</td>
+				<td>'.date('d/m/Y',strtotime($borrowQuerySTMTResult['start_date'])).'</td>
+				<td>Εκρεμεί επιβεβαίωση</td>
+				<td></td>
+				</tr>
+				</tbody>
+			';
+		}else{
+			echo '
+				<tbody>
+				<tr>
+				'.$borrowState.'
+				<td>'.$equipName.'</td>
+				<td>'.date('d/m/Y',strtotime($borrowQuerySTMTResult['start_date'])).'</td>
+				<td>'.date('d/m/Y',strtotime($borrowQuerySTMTResult['expire_date'])).'</td>
+				<td><a href=borrow_change.php?id_borrow='.$borrowQuerySTMTResult['id_borrow'].' class="fa fa-wrench"></a></td>
+				</tr>
+				</tbody>
+			';	
+		}	
+	}
+	echo '	
+		</table>			
+		</div>
+		</div>
 		</div>		
-	</div>			
+		</div>	
+	';
+		
+	
 
-</body>
-</html>
-
-<?php
-	include("views/footer.php");
+include("views/footer.php");
 ?>	
