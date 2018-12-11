@@ -4,16 +4,13 @@ include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
 
-
-	if (array_key_exists("logout", $_GET)){
-	unset($_SESSION);
-	}
 	if (!isset($_SESSION['email'])){
 
 		header("Location: index.php");
+		die("Δεν έχετε συνδεθεί");
 	}	
 	
-	$idToChange=$_GET['id_equip'];
+	$idToChange= filter_var($_GET['id_equip'],FILTER_SANITIZE_NUMBER_FLOAT);
 	$equipQuerySQL = "SELECT * FROM equip_svds INNER JOIN department_svds on equip_svds.department = department_svds.id_dep INNER JOIN provider_svds on equip_svds.provider_e = provider_svds.id_p INNER JOIN comments_svds on equip_svds.comment_e = comments_svds.id_comment INNER JOIN description_svds on equip_svds.short_desc_e = description_svds.id_desc WHERE equip_svds.id_equip = $idToChange"; 
 	$equipQuerySTMT = $db->prepare($equipQuerySQL);
 	$equipQuerySTMT->execute();
@@ -23,11 +20,6 @@ include("views/navbar.php");
 	$descID=$result['id_desc'];
 	$comID=$result['id_comment'];
 	$provID=$result['id_p'];
-	if (isset($_GET['file'])){
-		$realFilename= $_GET['file'];
-		$hashFilename = md5($realFilename);
-	}
-
 
 
 	if(isset($_POST['add'])){
@@ -50,8 +42,8 @@ include("views/navbar.php");
 			$add_commentSTMT = $db->prepare($add_commentSQL);
 			$add_commentSTMT->bindParam(':comID', $comID, PDO::PARAM_INT);
 			$add_commentSTMT->bindParam(':comments', $_POST['comments']);
-			$add_commentSTMT->bindParam(':id_equip_com', $_SESSION['password']);
-			$add_commentSTMT->bindParam(':id_user_com', $_SESSION['password']);
+			$add_commentSTMT->bindParam(':id_equip_com', $idToChange);
+			$add_commentSTMT->bindParam(':id_user_com', $_SESSION['aem']);
 			$add_commentSTMT->execute();
 
 			$add_providerSQL = "UPDATE provider_svds SET name_p= :name_p, telephone_p= :telephone_p, website_p= :website_p, email_p= :email_p, support_p= :support_p, comments_p= :comments_p WHERE id_p= :provID";
@@ -64,9 +56,20 @@ include("views/navbar.php");
 			$add_providerSTMT->bindParam(':support_p', $_POST['support_p']);
 			$add_providerSTMT->bindParam(':comments_p', $_POST['comments_p']);
 			$add_providerSTMT->execute();		
-					 		
+			
+			if ($_POST['retired'] == "Δεν έχει αποσυρθεί"){
+				$retiredState = 0;
+			}else{
+				$retiredState = 1;
+			}
 
-			$add_equipmentSQL = "UPDATE equip_svds SET name_e= :name_e, buy_method_e= :buy_method_e, buy_year_e= :buy_year_e, owner_name= :owner_name, department= :department, provider_e= :provider_e, isborrowed= :isborrowed, comment_e= :comment_e, retired= :retired, short_desc_e= :short_desc_e, location_e= :location_e, serial_number= :serial_number, real_filename= :real_filename, hash_filename= :hash_filename WHERE id_equip= :idToChange";
+			if ($_POST['isborrowed'] == "Δεν είναι διαθέσιμο"){
+				$conditionState = 0;
+			}else{
+				$conditionState = 1;
+			}		 		
+
+			$add_equipmentSQL = "UPDATE equip_svds SET name_e= :name_e, buy_method_e= :buy_method_e, buy_year_e= :buy_year_e, owner_name= :owner_name, department= :department, provider_e= :provider_e, isborrowed= :isborrowed, comment_e= :comment_e, retired= :retired, short_desc_e= :short_desc_e, location_e= :location_e, serial_number= :serial_number WHERE id_equip= :idToChange";
 			$add_equipmentSTMT = $db->prepare($add_equipmentSQL);
 			$add_equipmentSTMT->bindParam(':idToChange', $idToChange, PDO::PARAM_INT);
 		    $add_equipmentSTMT->bindParam(':name_e', $_POST['name_e']);
@@ -75,14 +78,12 @@ include("views/navbar.php");
 		    $add_equipmentSTMT->bindParam(':owner_name', $_POST['owner_name']);
 		    $add_equipmentSTMT->bindParam(':department', $depID);
 		    $add_equipmentSTMT->bindParam(':provider_e', $provID);
-		    $add_equipmentSTMT->bindParam(':isborrowed', $_POST['isborrowed']);
+		    $add_equipmentSTMT->bindParam(':isborrowed', $conditionState);
 		    $add_equipmentSTMT->bindParam(':comment_e', $comID);
-		    $add_equipmentSTMT->bindParam(':retired', $_POST['retired']);
+		    $add_equipmentSTMT->bindParam(':retired', $retiredState);
 		    $add_equipmentSTMT->bindParam(':short_desc_e', $descID);
 		    $add_equipmentSTMT->bindParam(':location_e', $_POST['location_e']);
 		    $add_equipmentSTMT->bindParam(':serial_number', $_POST['serial_number']);
-		    $add_equipmentSTMT->bindParam(':real_filename', $realFilename);
-		    $add_equipmentSTMT->bindParam(':hash_filename', $hashFilename);
 		    $add_equipmentSTMT->execute();
 
 		   
@@ -119,14 +120,14 @@ include("views/navbar.php");
 
 							    <label for="isborrowed">Διαθεσιμότητα :</label>
 			    				<select class="form-control" name="isborrowed" id="isborrowed" value"'.$result['isborrowed'].'">
-				  				<option>0</option>
-				  				<option>1</option>
+				  				<option>Δεν είναι διαθέσιμο</option>
+  								<option>Είναι διαθέσιμο</option>
 								</select>
 
 							    <label for="retired">Κατάσταση Απόσυρσης:</label>
 							    <select class="form-control" name="retired" id="retired" value="'.$result['retired'].'">
-  								<option>0</option>
-  								<option>1</option>
+  								<option>Δεν έχει αποσυρθεί</option>
+  								<option>Έχει αποσυρθεί</option>
 								</select>
 
 							    <label for="location_e">Τοποθεσία label:</label>

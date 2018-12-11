@@ -1,4 +1,4 @@
-<?php
+<?php	
 include("variables_file.php");
 include("views/connection.php");
 include("views/header.php");
@@ -11,6 +11,7 @@ include("views/navbar.php");
 
 	} else {
 		header("Location: index.php");
+		die("Δεν έχετε συνδεθεί");
 	}
 	
 	echo '
@@ -42,9 +43,12 @@ include("views/navbar.php");
 		    </thead>
 	';
 	while ($borrowQuerySTMTResult=$borrowQuerySTMT->fetch(PDO::FETCH_ASSOC)) {
-		$borrowState = '<td id="stateIconSuccess" class="fa fa-check" title=Ενεργός></td>';
-		if ($borrowQuerySTMTResult['notify10'] <= 0){
-			$borrowState ='<td id="stateIconNoSuccess" class="fa fa-power-off" title="Ανενεργός"></td>';
+		$now = new DateTime();
+		$dateToCheck = new DateTime($borrowQuerySTMTResult['expire_date']);
+		if($dateToCheck >= $now) {
+    		$borrowState = '<td id="stateIconSuccess" class="fa fa-check" title=Ενεργός></td>';
+		}else {
+  			$borrowState ='<td id="stateIconNoSuccess" class="fa fa-power-off" title="Ανενεργός"></td>';
 		}
 		$idEquipToBorrow = $borrowQuerySTMTResult['id_equip_borrow'];
 		$equipBorrowQuerySQL = "SELECT * FROM equip_svds WHERE id_equip = :idEquipToBorrow";

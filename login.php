@@ -9,6 +9,7 @@ if (array_key_exists("logout", $_GET)){
 	unset($_SESSION);
 } else if (array_key_exists("email", $_SESSION)){
 	header("Location: index.php");
+  die("Δεν έχετε συνδεθεί");
 }
 
 
@@ -34,6 +35,7 @@ try{
     	$_SESSION['id'] = $logInQuerySTMTResult['id'];
     	$userID= $logInQuerySTMTResult['id'];
     	header("Location: index.php");     
+      die("Δεν έχετε συνδεθεί");
 	} else {
 		echo '<div class="container"><div class="p-3 mb-2 bg-danger text-white">Πρόβλημα εισόδου. Παρακαλώ εισάγετε τα σωστά στοιχεία.</div></div>';
 	} 

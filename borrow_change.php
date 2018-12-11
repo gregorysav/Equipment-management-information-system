@@ -5,7 +5,7 @@ include("views/header.php");
 include("views/navbar.php");
 	if ($_SESSION['email']){
 
-		$idToChange = $_GET['id_borrow'];
+		$idToChange = filter_var($_GET['id_borrow'],FILTER_SANITIZE_NUMBER_FLOAT);
 		$userToBorrow = $_SESSION['aem'];
 
 		$userQueryBorrowSQL = "SELECT * FROM users_svds WHERE id = :userToBorrow";
@@ -38,28 +38,32 @@ include("views/navbar.php");
 	 		$findEndDate = $_POST['endDate'];
 	 		$end = date_create($findEndDate);
 	 		$daysToEnd = date_diff($startToday,$end)->format('%a');
+	 		$start_date = filter_var($_POST['startDate'],FILTER_SANITIZE_STRING); 
+	 		$expire_date = filter_var($_POST['endDate'],FILTER_SANITIZE_STRING);
+	 		$extend_reason = filter_var($_POST['extendReason'],FILTER_SANITIZE_STRING);
 	 		$finishBorrowSQL = "UPDATE borrow_svds SET start_date= :start_date, expire_date= :expire_date, isborrowed= :isborrowed, notify30= :notify30, notify20= :notify20, notify10= :notify10, confirmation_borrow= :confirmation_borrow, extend_reason= :extend_reason WHERE id_borrow= :idToChange";
 	 		$finishBorrowSTMT = $db->prepare($finishBorrowSQL);
 	 		$finishBorrowSTMT->bindParam(':idToChange', $idToChange, PDO::PARAM_INT);
-	 		$finishBorrowSTMT->bindParam(':start_date', $_POST['startDate']);
-		    $finishBorrowSTMT->bindParam(':expire_date', $_POST['endDate']);
+	 		$finishBorrowSTMT->bindParam(':start_date', $start_date);
+		    $finishBorrowSTMT->bindParam(':expire_date', $endDate);
 		    $finishBorrowSTMT->bindParam(':isborrowed', $zero);
 		    $finishBorrowSTMT->bindParam(':notify30', $daysToEnd);
 		    $finishBorrowSTMT->bindParam(':notify20', $daysToEnd);
 		    $finishBorrowSTMT->bindParam(':notify10', $daysToEnd);
 		    $finishBorrowSTMT->bindParam(':confirmation_borrow', $zero);
-		    $finishBorrowSTMT->bindParam(':extend_reason', $_POST['extendReason']);
+		    $finishBorrowSTMT->bindParam(':extend_reason', $extend_reason);
 		    $finishBorrowSTMT->execute();
 
 		    	echo '<a class="p-3 mb-2 bg-success text-white">Επιτυχείς καταχώρηση αποτελεσμάτων</a>';
 		    	header("Location: active.php");
-		    	 	
+		    	die("Δεν έχετε συνδεθεί");	    	 	
 
 	 	}
 
 			 	
 } else {
 		header("Location: index.php");
+		die("Δεν έχετε συνδεθεί");
 	}
 
 echo '		
@@ -71,7 +75,7 @@ echo '
 				 <h3>Αίητηση τροποποίησης επιλεγμένου δανεισμού</h3>
 				  <div class="form-group">
 				    <label for="id_equip_borrow">Εξαρτήματα: </label>
-				    <input type="text" class="form-control" id="id_equip_borrow" value="'.$equipName.'">				    
+				    <li id="id_equip_borrow" value="'.$equipName.'">'.$equipName.'</li>				    
 				  </div>
 				  <div class="form-group">
 				    <label for="startDate">Ημερομηνία έναρξης: </label><br>

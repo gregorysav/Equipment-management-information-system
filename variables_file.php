@@ -4,10 +4,11 @@ if(!isset($_SESSION))
     session_start(); 
 }
 include("views/connection.php");
-	
+include("checkUser.php");
 
-	$zero= 0;
+    $zero= 0;
 	$one = 1;
+	$two = 2;
 	$id = $_SESSION['id'];
 	$username = $_SESSION['email'];
 	$aem = $_SESSION['aem'];
@@ -24,12 +25,13 @@ include("views/connection.php");
 	$today = date('d-m-Y');
 	$newTodayFormat = date("Y-m-d", strtotime($today));
     $startToday = date_create($today);
+    $newEndDayFormat = date("Y-m-d", strtotime("+3 months"));
     $departmentID = 0;
     $descriptionID = 0;
     $commentID = 0;
     $providerID = 0;
     $startPagination = 0;
-    $limitPagination = 2;
+    $limitPagination = 3;
     $pageOfPagination = 1;
     $depID = 0;
 	$descID = 0;
@@ -42,5 +44,6 @@ include("views/connection.php");
 	$departmentsNameArray = array();
 	$providersNameArray = array();
 	$noImageToDisplay = "noimage.jpg";
+	$basketItems = 0;
 
 ?>    

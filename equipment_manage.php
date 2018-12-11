@@ -4,12 +4,11 @@ include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
 
-	if (array_key_exists("logout", $_GET)){
-	unset($_SESSION);
-	}
+
 	if (!isset($_SESSION['email'])){
 
 		header("Location: index.php");
+		die("Δεν έχετε συνδεθεί");
 	}	
 		
 
@@ -29,44 +28,48 @@ include("views/navbar.php");
 	 	$equipQuerySTMT->execute();
 
 		echo '
-			<div class="container">
-			<table class="table table-bordered table-hover">
-			<thead class="thead-dark">
-			    <tr>
-						      <th scope="col"></th>
-						      <th scope="col"><form name="form" method="get">
-  							  <input type="text" name="equipmentName"  class="form-control input-lg" id="equipmentName" autocomplete="off" placeholder="Όνομα εξαρτήματος"/>
-							  </form></th>
-						      <th scope="col"><form name="form" method="get">
-  							  <input type="text" name="yearOfBuy"  class="form-control input-lg" id="yearOfBuy" autocomplete="off" placeholder="π.χ 2000"/>
-							  </form></th>
-						      <th scope="col"><form name="form" method="get">
-  							  <input type="text" name="locationName"  class="form-control input-lg" id="locationName" autocomplete="off" placeholder="π.χ Κοζάνη"/>
-							  </form></th>
-							  <th scope="col"></th>
-						    </tr>
-			    <tr>
-			    <th scope="col">Εικόνα</th>
-			    <th scope="col">Όνομα</th>
-			    <th scope="col">Έτος απόκτησης</th>
-			    <th scope="col">Τοποθεσία</th>
-			    <th scope="col">Ενέργειες</th>
-			    </tr>
-			</thead>
+			<div class="container" id="tableEquipment">
+				<div class="form-inline" id="searchHolder">
+	 						Αναζήτηση:	
+	 					  	<form name="form" method="get">
+	  						<input type="text" name="equipmentName"  class="form-control input-lg" id="equipmentName" autocomplete="off" placeholder="Όνομα εξαρτήματος"/>
+							</form>
+							<form name="form" method="get">
+	  						<input type="text" name="yearOfBuy"  class="form-control input-lg" id="yearOfBuy" autocomplete="off" placeholder="Ημερομηνία απόκτησης"/>
+							</form>
+							<form name="form" method="get">
+	  						<input type="text" name="locationName"  class="form-control input-lg" id="locationName" autocomplete="off" placeholder="Μέρος"/>
+						    </form>
+						</div>	
+				<table class="table table-bordered table-hover">
+				<thead class="thead-dark">
+				    <tr>
+				    <th scope="col">Εικόνα</th>
+				    <th scope="col">Όνομα</th>
+				    <th scope="col">Έτος απόκτησης</th>
+				    <th scope="col">Τοποθεσία</th>
+				    <th scope="col">Ενέργειες</th>
+				    </tr>
+				</thead>
 		';
 		$url = $_SERVER['REQUEST_URI'];
 		$value=(explode("=", $url));
 		if (isset($value[1]) AND $value[1] == ""){
 			while($equipQuerySTMTResult=$equipQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+				if (!$imageToDisplaySTMTResult['hash_filename']){
+			 		$imageHashedName = "noimage.jpg";	
+			 	}else {
+			 		$imageHashedName = $imageToDisplaySTMTResult['hash_filename'];
+			 	}
 		 		if (($equipQuerySTMTResult['quantity']) > 0 ){
 		 		echo '
 	 						  <tbody>
 	 						  <tr>
-						      <td><img src="uploadedImages/'.$equipQuerySTMTResult['real_filename'].'"/></td>
+						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
 						      <td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'>'.$equipQuerySTMTResult['name_e'].'</a></td>
 						      <td>'.$equipQuerySTMTResult['buy_year_e'].'</td>
 						      <td>'.$equipQuerySTMTResult['location_e'].'</td>
-						      <td><button id="delete" title=Διαγραφή name ="delete" type="submit"><a href=equipment_delete.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="fa fa-recycle btn btn-dark"></a></button><br><br><button id="modify" title=Τροποποίηση name ="modify"  type="submit"><a href=equipment_modify.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="fa fa-wrench btn btn-dark"></a></button><br><br><button id="addImage" title=Φωτογραφία name ="addImage"  type="submit"><a href=addImage.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="fa fa-camera btn btn-dark"></a></button></td>
+						      <td><button id="delete" title=Διαγραφή name ="delete" type="submit"><a href=equipment_delete.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark">Διαγραφή</a></button><br><button id="modify" title=Τροποποίηση name ="modify"  type="submit"><a href=equipment_modify.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark">Αλλαγή</a></button><br><button id="addImage" title=Φωτογραφία name ="addImage"  type="submit"><a href=addImage.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark">Εικόνα</a></button></td>
 						      </tr>
 						      </tbody>
 				';
@@ -80,14 +83,19 @@ include("views/navbar.php");
     		$searchQuerySTMT->bindParam(':keyword', $_GET['equipmentName']); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+				if (!$searchQuerySTMTResult['hash_filename']){
+			 		$imageHashedName = "noimage.jpg";	
+			 	}else {
+			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
+			 	}
 				echo '
 	 						  <tbody>
 	 						  <tr>
-						      <td><img src="uploadedImages/'.$searchQuerySTMTResult['real_filename'].'"/></td>
+						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
 						      <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
 						      <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
 						      <td>'.$searchQuerySTMTResult['location_e'].'</td>
-						      <td><button id="delete" title=Διαγραφή name ="delete" type="submit"><a href=equipment_delete.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-recycle btn btn-dark"></a></button><br><br><button id="modify" title=Τροποποίηση name ="modify"  type="submit"><a href=equipment_modify.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-wrench btn btn-dark"></a></button><br><br><button id="addImage" title=Φωτογραφία name ="addImage"  type="submit"><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-camera btn btn-dark"></a></button></td>
+						      <td><a href=equipment_delete.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="delete" title=Διαγραφή name ="delete">Διαγραφή</button></a><br><a href=equipment_modify.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="modify" title=Τροποποίηση name ="modify">Αλλαγή</button></a><br><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="addImage" title=Φωτογραφία name ="addImage">Εικόνα</button></a></td>
 						      </tr>
 						      </tbody>
 				';
@@ -99,14 +107,19 @@ include("views/navbar.php");
     		$searchQuerySTMT->bindParam(':keyword', $_GET['yearOfBuy']); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+				if (!$searchQuerySTMTResult['hash_filename']){
+			 		$imageHashedName = "noimage.jpg";	
+			 	}else {
+			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
+			 	}
 				echo '
 	 						  <tbody>
 	 						  <tr>
-						      <td><img src="uploadedImages/'.$searchQuerySTMTResult['real_filename'].'"/></td>
+						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
 						      <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
 						      <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
 						      <td>'.$searchQuerySTMTResult['location_e'].'</td>
-						      <td><button id="delete" title=Διαγραφή name ="delete" type="submit"><a href=equipment_delete.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-recycle btn btn-dark"></a></button><br><br><button id="modify" title=Τροποποίηση name ="modify"  type="submit"><a href=equipment_modify.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-wrench btn btn-dark"></a></button><br><br><button id="addImage" title=Φωτογραφία name ="addImage"  type="submit"><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-camera btn btn-dark"></a></button></td>
+						      <td><a href=equipment_delete.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="delete" title=Διαγραφή name ="delete">Διαγραφή</button></a><br><a href=equipment_modify.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="modify" title=Τροποποίηση name ="modify">Αλλαγή</button></a><br><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="addImage" title=Φωτογραφία name ="addImage">Εικόνα</button></a></td>
 						      </tr>
 						      </tbody>
 				';
@@ -117,28 +130,38 @@ include("views/navbar.php");
     		$searchQuerySTMT->bindParam(':keyword', $_GET['locationName']); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+				if (!$searchQuerySTMTResult['hash_filename']){
+			 		$imageHashedName = "noimage.jpg";	
+			 	}else {
+			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
+			 	}
 				echo '
 	 						  <tbody>
 	 						  <tr>
-						      <td><img src="uploadedImages/'.$searchQuerySTMTResult['real_filename'].'"/></td>
+						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
 						      <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
 						      <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
 						      <td>'.$searchQuerySTMTResult['location_e'].'</td>
-						      <td><button id="delete" title=Διαγραφή name ="delete" type="submit"><a href=equipment_delete.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-recycle btn btn-dark"></a></button><br><br><button id="modify" title=Τροποποίηση name ="modify"  type="submit"><a href=equipment_modify.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-wrench btn btn-dark"></a></button><br><br><button id="addImage" title=Φωτογραφία name ="addImage"  type="submit"><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="fa fa-camera btn btn-dark"></a></button></td>
+						      <td><a href=equipment_delete.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="delete" title=Διαγραφή name ="delete">Διαγραφή</button></a><br><a href=equipment_modify.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="modify" title=Τροποποίηση name ="modify">Αλλαγή</button></a><br><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="addImage" title=Φωτογραφία name ="addImage">Εικόνα</button></a></td>
 						      </tr>
 						      </tbody>
 				';
 			}
     	}else{
 			while($equipQuerySTMTResult=$equipQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+				if (!$equipQuerySTMTResult['hash_filename']){
+			 		$imageHashedName = "noimage.jpg";	
+			 	}else {
+			 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
+			 	}
 			echo '
 				<tbody>
 				<tr>
-		      	<td><img src="uploadedImages/'.$equipQuerySTMTResult['real_filename'].'"/></td>
+		      	<td><img src="uploadedImages/'.$imageHashedName.'"/></td>
 		      	<td>'.$equipQuerySTMTResult['name_e'].'</td>
 		      	<td>'.$equipQuerySTMTResult['buy_year_e'].'</td>
 		      	<td>'.$equipQuerySTMTResult['location_e'].'</td>
-		      	<td><button id="delete" title=Διαγραφή name ="delete" type="submit"><a href=equipment_delete.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="fa fa-recycle btn btn-dark"></a></button><br><br><button id="modify" title=Τροποποίηση name ="modify"  type="submit"><a href=equipment_modify.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="fa fa-wrench btn btn-dark"></a></button><br><br><button id="addImage" title=Φωτογραφία name ="addImage"  type="submit"><a href=addImage.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="fa fa-camera btn btn-dark"></a></button></td>
+		      	<td><a href=equipment_delete.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark" id_equip='.$equipQuerySTMTResult['id_equip'].'><button id="delete" name ="delete">Διαγραφή</button></a><br><a href=equipment_modify.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="modify"  name ="modify">Αλλαγή</button></a><br><a href=addImage.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark"><button id="addImage" name ="addImage">Εικόνα</button></a></td>
 		      	</tr>
 		      	</tbody>
 		    ';
@@ -152,27 +175,31 @@ include("views/navbar.php");
 	    $totalCellsPagination = ceil($rowsNumberPagination/$limitPagination);
 
 	    echo '
-	       	<div style="display: flex; padding-left: 0px; list-style: none; justify-content: center;">
-	        	 <ul class="pagination" style="position: fixed; bottom: 10px;">
+	       	<br>
+ 			<ul class="pagination pagination-sm justify-content-center">
 	    ';
 	    if ($pageOfPagination > 1){    	 
 	    	echo'
-	    		<li><a href=equipment_manage.php?p='.($pageOfPagination-1).' class="button"><<</a></li>
+	    		<li class="page-item">
+	    		<a class="page-link" href=equipment_manage.php?p='.($pageOfPagination-1).'><<</a></li>
 	    	';
 	    }
 
 	    for ($i=1; $i <= $totalCellsPagination; $i++) { 
             if ($pageOfPagination == $i){
-                echo "<li class='active'><a href=equipment_manage.php?p=".$i.">".$i."</a></li>";                    
+                echo "<li class='page-item  active'>
+                <a class='page-link' href=equipment_manage.php?p=".$i.">".$i."</a></li>";                    
             }else {
 
-        	    echo "<li><a href=equipment_manage.php?p=".$i.">".$i."</a></li>";
+        	    echo "<li class='page-item'>
+        	    <a class='page-link' href=equipment_manage.php?p=".$i.">".$i."</a></li>";
             }
         }
 
         if ($pageOfPagination < $totalCellsPagination){    	 
 	    	echo'
-	           	<li><a href=equipment_manage.php?p='.($pageOfPagination+1).' class="button">>></a></li>
+	           	<li class="page-item">
+	           	<a class="page-link" href=equipment_manage.php?p='.($pageOfPagination+1).'>>></a></li>
 	        ';
 	    }       	
         echo '

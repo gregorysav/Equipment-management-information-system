@@ -20,6 +20,11 @@ include("views/navbar.php");
     		$searchQuerySTMT->bindParam(':keyword', $_GET['equipmentName']); 
     		$searchQuerySTMT->execute();
     		$searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC);
+    		if (!$searchQuerySTMTResult['hash_filename']){
+			 		$imageHashedName = "noimage.jpg";	
+			}else {
+			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
+			}
 			if ($searchQuerySTMTResult){
 
 				echo '
@@ -39,7 +44,7 @@ include("views/navbar.php");
 				echo '
 					<tbody>
 					<tr>
-					<td><img src="uploadedImages/'.$searchQuerySTMTResult['real_filename'].'"/></td>
+					<td><img src="uploadedImages/'.$imageHashedName.'"/></td>
 				    <td>'.$searchQuerySTMTResult['name_e'].'</td>
 				    <td>'.$searchQuerySTMTResult['owner_name'].'</td>
 				    <td>'.$searchQuerySTMTResult['location_e'].'</td>
@@ -74,11 +79,16 @@ include("views/navbar.php");
 					</thead>
 				';
 				while($equipQuerySTMTResult=$equipQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+					if (!$equipQuerySTMTResult['hash_filename']){
+					 		$imageHashedName = "noimage.jpg";	
+					}else {
+					 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
+					}
 				 	if (($equipQuerySTMTResult['quantity']) > 0 ){
 				 		echo '
 							<tbody>
 							<tr>
-							<td><img src="uploadedImages/'.$equipQuerySTMTResult['real_filename'].'"/></td>
+							<td><img src="uploadedImages/'.$imageHashedName.'"/></td>
 							<td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'>'.$equipQuerySTMTResult['name_e'].'</a></td>
 							<td>'.$equipQuerySTMTResult['owner_name'].'</td>
 				    		<td>'.$equipQuerySTMTResult['location_e'].'</td>
@@ -95,24 +105,39 @@ include("views/navbar.php");
 				$rowsNumberPagination = $rowsQuerySTMT->rowCount();
 		        $totalCellsPagination = ceil($rowsNumberPagination/$limitPagination);
 				echo '
-				  	<div style="display: flex; padding-left: 0px; list-style: none; justify-content: center;">
-					<ul class="pagination" style="position: fixed; bottom: 10px;">
+				  	<br>
+ 					<ul class="pagination pagination-sm justify-content-center">
 				';		
+				if ($pageOfPagination > 1){    	 
+			    	echo'
+			    		<li class="page-item">
+			    		<a class="page-link" href=new_borrow.php?p='.($pageOfPagination-1).'><<</a></li>
+			    	';
+			    }
+
 				for ($i=1; $i <= $totalCellsPagination; $i++) { 
 				    if ($pageOfPagination == $i){
-				        echo "<li class='active'><a href=new_borrow.php?p=".$i.">".$i."</a></li>";                    
+				        echo "<li class='page-item  active'>
+				        <a class='page-link' href=new_borrow.php?p=".$i.">".$i."</a></li>";                    
 				    }else {
-				        echo "<li><a href=new_borrow.php?p=".$i.">".$i."</a></li>";
+				        echo "<li class='page-item'>
+				        <a class='page-link' href=new_borrow.php?p=".$i.">".$i."</a></li>";
 				    }
 		    	}
+		    	if ($pageOfPagination < $totalCellsPagination){    	 
+			    	echo'
+			           	<li class="page-item">
+			           	<a class="page-link" href=new_borrow.php?p='.($pageOfPagination+1).'>>></a></li>
+			        ';
+			    } 
 		    	echo '
 		       		</ul>
 		       		</table>
 		       		</div>
 		    	';
 		 	}
-		 	
-	}	
+		} 	
+
 	echo '
 	   	
 		</div>	
