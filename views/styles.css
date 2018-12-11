@@ -90,6 +90,19 @@ td a {
 	color: black; 
 }
 
+#dropDown a {
+	background-color: #212529;
+}
+
+#dropDown a:hover {
+	background-color: white;
+}
+
+#dropDownButton a:hover {
+	background-color: #212529;
+	color: white;
+}
+
 td a:visited {
 	color: black; 
 }
@@ -130,6 +143,11 @@ hr {
 }
 
 @media (max-width: 600px) {
+	
+  html {
+	height: 1000px;
+  }
+
   .form-inline input {
     margin: 5px 0;
   }
@@ -146,7 +164,11 @@ hr {
   #indexPage img {
   	width: 300px;
   	height: 350;
-  	padding-left: 140px;
+  	padding-left: 150px;
+  }
+
+  #indexPage p {
+  	text-align: center;
   }
 
   #welcome {
@@ -159,12 +181,29 @@ hr {
 	align-items: center;
 	justify-content: center;
   	align-content: center;
-  	
   }
 
   #footerMessage{
 	opacity: 0.0;
   }
+
+   a:hover {
+	background-color: #212529;
+	color: white;
+   }
+
+   
+
+}
+
+#welcomeMessage {
+	color: black;
+	position: absolute;
+	right: 10%;
+}
+
+#indexPage p {
+ 	padding-left: 60px;
 }
 
 #footerMessage{
@@ -176,7 +215,7 @@ hr {
   	height:10px;
   	right:auto;
   	left:auto;
-  	bottom: 10px;
+  	bottom: 5px;
 }
 
 #footerMessage a:visited{
@@ -197,6 +236,10 @@ td img {
 td {
       text-align: center;
       vertical-align: middle;
+}
+
+tr{
+	height: 50px;
 }
 
 .add_to_basket {
@@ -245,4 +288,12 @@ td {
 #commentArea {
 	width: 350px;
 	height: 100px;
+}
+
+.pagination {
+  display: -ms-flexbox;
+  display: flex;
+  padding-left: 0;
+  list-style: none;
+  border-radius: 0.25rem;
 }

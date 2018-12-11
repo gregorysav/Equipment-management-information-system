@@ -25,19 +25,40 @@ if ($_SESSION['type'] == 0) {
   '; 
 }
 if ($_SESSION['type'] == 1) {
-  echo '
-    <li class="nav-item active">
-      <a class="nav-link" href="confirmation.php">Επιβεβαίωση Δανεισμών</a>
-    </li>
+  echo '  
+    <div class="btn-group">
+    <button class="btn btn-dark btn-sm" id="dropDownButton" type="button"><a class="dropdown-item" href="new_borrow.php">Νέος Δανεισμός</a>
+    </button>
+    <button type="button" class="btn btn-sm btn-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <div class="dropdown-menu" id="dropDown">
+      <a class="dropdown-item" href="confirmation.php">Επιβεβαίωση Δανεισμών</a>
+      <a class="dropdown-item" href="backend.php">Όλοι οι Δανεισμοί</a>
+      <a class="dropdown-item" id="pdfPrint" href="">Εκτύπωση Εντύπου</a>
+    </div>
+    </div>
+
   ';
 }
-echo'    
-    <li class="nav-item active">
-      <a class="nav-link" href="new_borrow.php">Νέος Δανεισμός</a>
-    </li> 
+if ($_SESSION['type'] == 0) {
+  echo'    
+      <li class="nav-item active">
+        <a class="nav-link" href="new_borrow.php">Νέος Δανεισμός</a>
+      </li>
+  ';
+}
+
+$basketQuerySQL = "SELECT * FROM basket_svds WHERE id_user_basket= :userBorrow";
+$basketQuerySTMT = $db->prepare($basketQuerySQL);
+$basketQuerySTMT->bindParam(':userBorrow', $aem); 
+$basketQuerySTMT->execute();
+$basketItems= $basketQuerySTMT->rowCount();
+
+echo'     
     </ul>
     <div class="form-inline my-2 my-lg-0" id="navbarButtons">
-        <a href="basket.php" class="fas fa-shopping-basket"> Καλάθι </a>
+        <a href="basket.php" class="fas fa-shopping-basket">('.$basketItems.') Καλάθι </a>
         <a href="logout.php" class="fas fa-sign-out-alt">  Αποσύνδεση</a>
     </div>
     </div>      
