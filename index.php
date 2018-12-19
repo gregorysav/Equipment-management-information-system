@@ -13,26 +13,24 @@ include("views/header.php");
     $dateSTMT = $db->prepare($dateSQL);
     $dateSTMT->execute();
     while($dateSTMTResult=$dateSTMT->fetch(PDO::FETCH_ASSOC)){	
-    	$now = new DateTime();
-		$findEndDate = $dateSTMTResult['expire_date'];
-	 	$endDate = date_create($findEndDate);
-	 	$daysToEnd = date_diff($startToday,$endDate)->format('%a');
-	 	$dateToCheck = new DateTime($dateSTMTResult['expire_date']);
-		if($dateToCheck > $now) {
+	 	$nowDate =  strtotime(date("d-m-Y"));
+		$dateToCheck = strtotime(date('d-m-Y',strtotime($dateSTMTResult['expire_date'])));
+		$dateDiff = ($dateToCheck - $nowDate) / 86400;
+		if($dateDiff > 0) {
     		$dateChangeSQL = "UPDATE borrow_svds SET  notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE id_borrow= :idBorrow";
 			$dateChangeSTMT = $db->prepare($dateChangeSQL);
 			$dateChangeSTMT->bindParam(':idBorrow', $dateSTMTResult['id_borrow'], PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify30', $daysToEnd, PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify20', $daysToEnd, PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify10', $daysToEnd, PDO::PARAM_INT);
+			$dateChangeSTMT->bindParam(':notify30', $dateDiff, PDO::PARAM_INT);
+			$dateChangeSTMT->bindParam(':notify20', $dateDiff, PDO::PARAM_INT);
+			$dateChangeSTMT->bindParam(':notify10', $dateDiff, PDO::PARAM_INT);
 			$dateChangeSTMT->execute();
 		}else {
 			$dateChangeSQL = "UPDATE borrow_svds SET  notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE id_borrow= :idBorrow";
 			$dateChangeSTMT = $db->prepare($dateChangeSQL);
 			$dateChangeSTMT->bindParam(':idBorrow', $dateSTMTResult['id_borrow'], PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify30', $zero, PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify20', $zero, PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify10', $zero, PDO::PARAM_INT);
+			$dateChangeSTMT->bindParam(':notify30', $dateDiff, PDO::PARAM_INT);
+			$dateChangeSTMT->bindParam(':notify20', $dateDiff, PDO::PARAM_INT);
+			$dateChangeSTMT->bindParam(':notify10', $dateDiff, PDO::PARAM_INT);
 			$dateChangeSTMT->execute();
 		}
     }

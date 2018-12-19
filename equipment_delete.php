@@ -5,7 +5,6 @@ include("views/header.php");
 include("views/navbar.php");
 
 	$idToDelete= filter_var($_GET['id_equip'],FILTER_SANITIZE_NUMBER_FLOAT);
-	
 
 	$deleteQueryBorrowSQL = "DELETE  FROM borrow_svds WHERE id_equip_borrow=  :idToDelete";
 	$deleteQueryBorrowSTMT = $db->prepare($deleteQueryBorrowSQL);

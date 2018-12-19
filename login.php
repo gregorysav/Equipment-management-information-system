@@ -33,6 +33,7 @@ try{
     	$_SESSION['telephone'] = $logInQuerySTMTResult['telephone'];
     	$_SESSION['type'] = $logInQuerySTMTResult['type'];
     	$_SESSION['id'] = $logInQuerySTMTResult['id'];
+      $_SESSION['fullName'] = $logInQuerySTMTResult['last_name'] .' '.$logInQuerySTMTResult['first_name'];
     	$userID= $logInQuerySTMTResult['id'];
     	header("Location: index.php");     
       die("Δεν έχετε συνδεθεί");
@@ -71,5 +72,5 @@ $db = null;
   '; 
 
 
-include("views/footer.php"); 
+// include("views/footer.php"); 
 ?>

@@ -78,12 +78,13 @@ if (isset($_GET) && ! empty($_GET) && $_GET["function"] == "remove") {
         $basketRemoveQuerySTMT->bindParam(':idToDelete', $idToDelete, PDO::PARAM_INT); 
         $basketRemoveQuerySTMT->execute(); 
 
-        $borrowRemoveQuerySQL = "DELETE FROM borrow_svds WHERE aem_borrow= :idUserToDelete";
+        $borrowRemoveQuerySQL = "DELETE FROM borrow_svds WHERE aem_borrow= :idUserToDelete AND isborrowed= :isBorrowed";
         $borrowRemoveQuerySTMT = $db->prepare($borrowRemoveQuerySQL);
-        $borrowRemoveQuerySTMT->bindParam(':idUserToDelete', $idUserToDelete, PDO::PARAM_INT); 
+        $borrowRemoveQuerySTMT->bindParam(':idUserToDelete', $idUserToDelete, PDO::PARAM_INT);
+        $borrowRemoveQuerySTMT->bindParam(':isBorrowed', $zero, PDO::PARAM_INT); 
         $borrowRemoveQuerySTMT->execute();
         header("Refresh:0; url=basket.php");
-        die("Δεν έχετε συνδεθεί"); 
+        die(); 
                 
 }   
 
@@ -144,16 +145,20 @@ if (isset($_GET) && ! empty($_GET) && $_GET["function"] == "locationQuery") {
 
 if (isset($_GET) && ! empty($_GET) && $_GET["function"] == "AEMQuery") {
         $search = filter_var($_POST['query'],FILTER_SANITIZE_STRING);
-        $searchQuerySQL = "SELECT * FROM users_svds WHERE aem LIKE '$search%'";  
+        $searchQuerySQL = "SELECT * FROM users_svds WHERE aem LIKE '$search%' OR first_name LIKE '$search%' OR last_name LIKE '$search%'";  
         $searchQuerySTMT = $db->prepare($searchQuerySQL);
         $searchQuerySTMT->execute();
             
-        $data= array();
-        while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)) {
-            $data[]= $searchQuerySTMTResult['last_name'].' '. $searchQuerySTMTResult['first_name'].' '.$searchQuerySTMTResult['aem'];
-        }           
-        echo json_encode($data);
-  
+        $data= '<ul class="list-unstyled">';
+        if ($searchQuerySTMT->rowCount() > 0){
+            while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)) {
+            $data .= '<li>'.$searchQuerySTMTResult['last_name'].' '. $searchQuerySTMTResult['first_name'].' '.$searchQuerySTMTResult['aem']. '</li>';
+           }           
+        }else {
+            $data .= '<li> Δεν βρέθηκαν χρήστες με αυτό το ΑΕΜ</li>';
+        }  
+        $data .= '</ul>';
+        echo $data;
 }
 
 if (isset($_GET) && ! empty($_GET) && $_GET["function"] == "saveComment") {
@@ -173,6 +178,189 @@ if (isset($_GET) && ! empty($_GET) && $_GET["function"] == "saveComment") {
          
 }
 
- 
+function PDFPrint ($fullName, $aem_borrow, $itemsToPrint, $borrowReason, $startDate, $endDate){
+    date_default_timezone_set('Europe/Athens');
+    setlocale(LC_TIME, 'el_GR.UTF-8');
+    $day = date("w");
+    $greekDays = array( "Κυριακή", "Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο" ); 
+    $greekMonths = array('Ιανουαρίου','Φεβρουαρίου','Μαρτίου','Απριλίου','Μαΐου','Ιουνίου','Ιουλίου','Αυγούστου','Σεπτεμβρίου','Οκτωβρίου','Νοεμβρίου','Δεκεμβρίου');
+    $greekDate = $greekDays[$day] . ', ' . date('j') . ' ' . $greekMonths[intval(date('m'))-1] . ' ' . date('Y');
+    $nowDate =  $greekDate;
+    require_once('tcpdf/tcpdf.php');
+
+    $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+    $pdf->SetCreator(PDF_CREATOR);
+    $pdf->setPrintHeader(false);
+    $pdf->setPrintFooter(false);
+
+    $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+    $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+
+    $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+    $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+    if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+        require_once(dirname(__FILE__).'/lang/eng.php');
+        $pdf->setLanguageArray($l);
+    }
+
+
+    $pdf->SetFont('freesans', 'BI', 16);
+    $pdf->setFont('freeserif');
+
+    $pdf->AddPage();
+    $pdf->Image('images/uowmlogo.jpg', 10, 10, 70, '', 'JPG', '', 'T', false, 300, 'L', false, false, 0,     false, false, false);
+    $pdf->Cell(0, 10, $nowDate, 0, false, 'R', 0, '', 3, false, 'T', 'M');
+    $pdf->Multicell(0,45,"");
+    $pdf->SetFont('freesans','U');
+    $pdf->Cell(0, 0, 'ΕΝΤΥΠΟ ΧΡΕΩΣΗΣ ΗΛΕΚΤΡΟΝΙΚΟΥ ΕΞΟΠΛΙΣΜΟΥ', 0, 0, 'C', 0, '', 0);
+    $pdf->SetFont('freesans','',12);
+    $pdf->Multicell(0,35,"");
+    $html = "
+    Ο Μηνάς Δασυγένης, Μέλος ΔΕΠ, ΤΜΠΤ παραδίδω στο(ν) $fullName (ΑΕΜ $aem_borrow) φοιτητή του ΤΜΠΤ, τον παρακάτω εξοπλισμό: 
+    ";
+    
+    $html .= " $itemsToPrint
+    Ο παραπάνω εξοπλισμός θα χρησιμοποιηθεί με σκοπό : $borrowReason";
+
+    $html .=" <br><br>για χρονικό διάστημα από $startDate  μέχρι $endDate </p>";
+    $pdf->writeHTML($html, true, false, true, false, '');
+    $pdf->Multicell(0,25,"");
+    $pdf->Cell(0, 10, 'Ο ΠΑΡΑΔΙΔΩΝ', 0, false, 'L', 0, '', 0, false, 'T', 'M');
+    $pdf->Cell(0, 10, 'Ο ΠΑΡΑΛΑΒΩΝ', 0, false, 'R', 0, '', 0, false, 'T', 'M');     
+
+    ob_end_clean(); 
+    $pdf->Output(); 
+}
+
+function adminDisplayInformation($id_borrow, $aem_borrow, $email, $expire_date) {
+    include("views/connection.php");
+    $send = -1;
+    $nowDate =  strtotime(date("d-m-Y"));
+    $dateToCheck = strtotime(date('d-m-Y',strtotime($expire_date)));
+    $dateDiff = ($dateToCheck - $nowDate) / 86400;
+    echo '<ul>';
+    if ($dateDiff > 31){
+        echo '<li><p>-Δανεισμός : '.$id_borrow.' (Φοιτητής ΑΕΜ: '.$aem_borrow.')</p>  
+              <p>-ΟΚ δεν χρειάζεται να στείλω ειδοποίηση λήγει σε '.$dateDiff.' μέρες </p></li>              
+        ';
+    } else {
+        if ($dateDiff == 30){
+            echo '<li><p>-Δανεισμός : '.$id_borrow.' στέλνω email ειδοποίησης στον φοιτητή με ΑΕΜ: '.$aem_borrow.'</p>    
+                  <p>-Στέλνω email στο '.$email.' γιατί ο δανεισμός με ID = '.$id_borrow.' λήγει σε 30 ημέρες.</p></li>               
+            ';  
+            $to = $email;
+            $subject = "Λήξη Δανεισμού";
+            $txt = 'Ο δανεισμός που έχεις κάνει λήγει σε '.$dateDiff.' ημέρες.';
+            $headers = "From: webmaster@example.com" . "\r\n" .
+            "CC: somebodyelse@example.com";
+            mail($to,$subject,$txt,$headers);
+            if( mail($to,$subject,$txt,$headers)){
+               echo "Το email στάλθηκε με επιτυχία";
+            }else{
+               echo "Το email δεν στάλθηκε με επιτυχία γιατί :" .$mail->ErrorInfo;
+            }
+            
+            $changeDateSQL = "UPDATE borrow_svds SET notify30= :notify30 WHERE id_borrow= :idToChange";
+            $changeDateSTMT = $db->prepare($changeDateSQL);
+            $changeDateSTMT->bindParam(':idToChange', $id_borrow);
+            $changeDateSTMT->bindParam(':notify30', $send);
+            $changeDateSTMT->execute();
+        }   
+        if($dateDiff == 20){
+            echo '<li><p>-Δανεισμός : '.$id_borrow.' στέλνω email ειδοποίησης στον φοιτητή με ΑΕΜ: '.$aem_borrow.'</p>    
+                  <p>-Στέλνω email στο '.$email.' γιατί ο δανεισμός με ID = '.$id_borrow.' λήγει σε 20 ημέρες.</p></li>               
+            ';  
+            $to = $email;
+            $subject = "Λήξη Δανεισμού";
+            $txt = 'Ο δανεισμός που έχεις κάνει λήγει σε '.$dateDiff.' ημέρες.';
+            $headers = "From: webmaster@example.com" . "\r\n" .
+            "CC: somebodyelse@example.com";
+            mail($to,$subject,$txt,$headers);
+            if( mail($to,$subject,$txt,$headers)){
+               echo "Το email στάλθηκε με επιτυχία";
+            }else{
+               echo "Το email δεν στάλθηκε με επιτυχία γιατί :" .$mail->ErrorInfo;
+            }
+
+            $changeDateSQL = "UPDATE borrow_svds SET notify30= :notify30, notify20= :notify20 WHERE id_borrow= :idToChange";
+            $changeDateSTMT = $db->prepare($changeDateSQL);
+            $changeDateSTMT->bindParam(':idToChange', $id_borrow);
+            $changeDateSTMT->bindParam(':notify30', $send);
+            $changeDateSTMT->bindParam(':notify20', $send);
+            $changeDateSTMT->execute();
+        }   
+        if($dateDiff == 10){
+            echo '<li><p>-Δανεισμός : '.$id_borrow.' στέλνω email ειδοποίησης στον φοιτητή με ΑΕΜ: '.$aem_borrow.'</p>    
+                  <p>-Στέλνω email στο '.$email.' γιατί ο δανεισμός με ID = '.$id_borrow.' λήγει σε 10 ημέρες.</p></li>               
+            ';  
+            $to = $email;
+            $subject = "Λήξη Δανεισμού";
+            $txt = 'Ο δανεισμός που έχεις κάνει λήγει σε '.$dateDiff.' ημέρες.';
+            $headers = "From: webmaster@example.com" . "\r\n" .
+            "CC: somebodyelse@example.com";
+            mail($to,$subject,$txt,$headers);
+            if( mail($to,$subject,$txt,$headers)){
+               echo "Το email στάλθηκε με επιτυχία";
+            }else{
+               echo "Το email δεν στάλθηκε με επιτυχία γιατί :" .$mail->ErrorInfo;
+            }
+            
+            $changeDateSQL = "UPDATE borrow_svds SET notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE id_borrow= :idToChange";
+            $changeDateSTMT = $db->prepare($changeDateSQL);
+            $changeDateSTMT->bindParam(':idToChange', $id_borrow);
+            $changeDateSTMT->bindParam(':notify30', $send);
+            $changeDateSTMT->bindParam(':notify20', $send);
+            $changeDateSTMT->bindParam(':notify10', $send);
+            $changeDateSTMT->execute();
+        }
+        if($dateDiff == 1 || $dateDiff == 0 ){
+            
+            echo '<li><p>-Δανεισμός : '.$id_borrow.' στέλνω email ειδοποίησης στον φοιτητή με ΑΕΜ: '.$aem_borrow.'</p>    
+                  <p>-Στέλνω email στο '.$email.' γιατί ο δανεισμός με ID = '.$id_borrow.' λήγει σήμερα στις '.date('d/m/Y',strtotime($expire_date)).'.</p></li>              
+            ';
+
+            $to = $email;
+            $subject = "Λήξη Δανεισμού";
+            $txt = 'Ο δανεισμός που έχεις λήγει σήμερα.';
+            $headers = "From: webmaster@example.com" . "\r\n" .
+            "CC: somebodyelse@example.com";
+            mail($to,$subject,$txt,$headers);
+            if( mail($to,$subject,$txt,$headers)){
+               echo "Το email στάλθηκε με επιτυχία";
+            }else{
+               echo "Το email δεν στάλθηκε με επιτυχία γιατί :" .$mail->ErrorInfo;
+            }
+        }   
+        if($dateDiff < 0 ){
+            $daysThatMailIsSend = abs(round($dateDiff));
+            if ($daysThatMailIsSend % 30 == 0){
+                echo '<li><p>-Δανεισμός : '.$id_borrow.' στέλνω email ειδοποίησης στον φοιτητή με ΑΕΜ: '.$aem_borrow.'</p>
+                      <p>-Στέλνω email στο  '.$email.' γιατί ο δανεισμός με ID = '.$id_borrow.' έχει λήξει εδώ και '.abs(round($dateDiff)).' μέρες.</p></li>    
+                ';
+                $changeDateSQL = "UPDATE borrow_svds SET notify_expire= :notify_expire WHERE id_borrow= :idToChange";
+                $changeDateSTMT = $db->prepare($changeDateSQL);
+                $changeDateSTMT->bindParam(':idToChange', $id_borrow);
+                $changeDateSTMT->bindParam(':notify_expire', $daysThatMailIsSend );
+                $changeDateSTMT->execute();
+                $to = $email;
+                $subject = "Λήξη Δανεισμού";
+                $txt = 'Ο δανεισμός που έχεις κάνει λήγει σε '.abs(round($dateDiff)).' ημέρες.';
+                $headers = "From: webmaster@example.com" . "\r\n" .
+                "CC: somebodyelse@example.com";
+                mail($to,$subject,$txt,$headers);
+                if( mail($to,$subject,$txt,$headers)){
+                   echo "Το email στάλθηκε με επιτυχία";
+                }else{
+                   echo "Το email δεν στάλθηκε με επιτυχία γιατί :" .$mail->ErrorInfo;
+                }
+            }    
+        }   
+    }
+    echo '</ul>';
+} 
 
 ?>     

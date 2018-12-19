@@ -18,7 +18,8 @@ include("checkUser.php");
 	$email = $_SESSION['email'];
 	$telephone = $_SESSION['telephone'];
 	$type = $_SESSION['type'];
-	$isA = "Σπουδαστής";
+	$isA = "Φοιτητής";
+	$fullName = $_SESSION['fullName']; 
 	if ($type == 1) {
 		$isA = "Διδάσκοντας";
 	}
@@ -43,7 +44,6 @@ include("checkUser.php");
 	$warningMessage = "";
 	$departmentsNameArray = array();
 	$providersNameArray = array();
-	$noImageToDisplay = "noimage.jpg";
 	$basketItems = 0;
 
 ?>    

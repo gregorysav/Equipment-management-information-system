@@ -3,7 +3,6 @@ include("variables_file.php");
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-	if ($_SESSION['email']){
 
 		$idToChange = filter_var($_GET['id_borrow'],FILTER_SANITIZE_NUMBER_FLOAT);
 		$userToBorrow = $_SESSION['aem'];
@@ -45,7 +44,7 @@ include("views/navbar.php");
 	 		$finishBorrowSTMT = $db->prepare($finishBorrowSQL);
 	 		$finishBorrowSTMT->bindParam(':idToChange', $idToChange, PDO::PARAM_INT);
 	 		$finishBorrowSTMT->bindParam(':start_date', $start_date);
-		    $finishBorrowSTMT->bindParam(':expire_date', $endDate);
+		    $finishBorrowSTMT->bindParam(':expire_date', $expire_date);
 		    $finishBorrowSTMT->bindParam(':isborrowed', $zero);
 		    $finishBorrowSTMT->bindParam(':notify30', $daysToEnd);
 		    $finishBorrowSTMT->bindParam(':notify20', $daysToEnd);
@@ -54,47 +53,39 @@ include("views/navbar.php");
 		    $finishBorrowSTMT->bindParam(':extend_reason', $extend_reason);
 		    $finishBorrowSTMT->execute();
 
-		    	echo '<a class="p-3 mb-2 bg-success text-white">Επιτυχείς καταχώρηση αποτελεσμάτων</a>';
+		    	echo '<a class="p-3 mb-2 bg-success text-white">Επιτυχής καταχώρηση αποτελεσμάτων</a>';
 		    	header("Location: active.php");
 		    	die("Δεν έχετε συνδεθεί");	    	 	
 
 	 	}
 
-			 	
-} else {
-		header("Location: index.php");
-		die("Δεν έχετε συνδεθεί");
-	}
-
-echo '		
-	<div class="container"> 	
-		<h3>Γεια σου <?php echo $userToBorrowName; ?>, έχεις επιλέξει το παρακάτω εξαρτήματα:  </h3>
-		<div class="row">
-		  	<div class="col-md-6">
-				<form method="post">
-				 <h3>Αίητηση τροποποίησης επιλεγμένου δανεισμού</h3>
-				  <div class="form-group">
-				    <label for="id_equip_borrow">Εξαρτήματα: </label>
-				    <li id="id_equip_borrow" value="'.$equipName.'">'.$equipName.'</li>				    
-				  </div>
-				  <div class="form-group">
-				    <label for="startDate">Ημερομηνία έναρξης: </label><br>
-				    <input type="date" id="startDate" value="'.$newTodayFormat.'" name="startDate" min="2000-01-02">
-				  </div>
-				  <div class="form-group">
-				    <label for="endDate">Ημερομηνία λήξης: </label><br>
-				    <input type="date" id="endDate "name="endDate" min="2000-01-02"><br>
-				    <label for="borrowExtend">Λόγος επέκτασης: </label><br>		
-				  	<textarea name="extendReason" rows="4" cols="50"> 
-					</textarea>
-				  </div>  
-				  <button type="submit" name="finish" class="btn btn-primary">Αίτηση Επέκτασης</button>
-				</form>
+		echo '		
+		<div class="container"> 	
+			<h3>Γεια σου <?php echo $userToBorrowName; ?>, έχεις επιλέξει το παρακάτω εξαρτήματα:  </h3>
+			<div class="row">
+			  	<div class="col-md-6">
+					<form method="post">
+					 <h3>Αίητηση τροποποίησης επιλεγμένου δανεισμού</h3>
+					  <div class="form-group">
+					    <label for="id_equip_borrow">Εξαρτήματα: </label>
+					    <li id="id_equip_borrow" value="'.$equipName.'">'.$equipName.'</li>				    
+					  </div>
+					  <div class="form-group">
+					    <label for="startDate">Ημερομηνία έναρξης: </label><br>
+					    <input type="date" id="startDate" value="'.$newTodayFormat.'" name="startDate" min="2000-01-02">
+					  </div>
+					  <div class="form-group">
+					    <label for="endDate">Ημερομηνία λήξης: </label><br>
+					    <input type="date" id="endDate "name="endDate" min="2000-01-02"><br>
+					    <label for="borrowExtend">Λόγος επέκτασης: </label><br>		
+					  	<textarea name="extendReason" rows="4" cols="50"></textarea>
+					  </div>  
+					  <button type="submit" name="finish" class="btn btn-primary">Αίτηση Επέκτασης</button>
+					</form>
+				</div>	
 			</div>	
-		</div>	
-	</div>
-
-';
+		</div>
+		';
 
 
 include("views/footer.php");

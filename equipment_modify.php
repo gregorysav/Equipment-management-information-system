@@ -4,11 +4,6 @@ include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
 
-	if (!isset($_SESSION['email'])){
-
-		header("Location: index.php");
-		die("Δεν έχετε συνδεθεί");
-	}	
 	
 	$idToChange= filter_var($_GET['id_equip'],FILTER_SANITIZE_NUMBER_FLOAT);
 	$equipQuerySQL = "SELECT * FROM equip_svds INNER JOIN department_svds on equip_svds.department = department_svds.id_dep INNER JOIN provider_svds on equip_svds.provider_e = provider_svds.id_p INNER JOIN comments_svds on equip_svds.comment_e = comments_svds.id_comment INNER JOIN description_svds on equip_svds.short_desc_e = description_svds.id_desc WHERE equip_svds.id_equip = $idToChange"; 
@@ -23,25 +18,42 @@ include("views/navbar.php");
 
 
 	if(isset($_POST['add'])){
+		$name_dep = filter_var($_POST['name_dep'],FILTER_SANITIZE_STRING);
+		$telephone_dep = filter_var($_POST['telephone_dep'],FILTER_SANITIZE_NUMBER_FLOAT);
+		$short_desc = filter_var($_POST['short_desc'],FILTER_SANITIZE_STRING);	
+		$long_desc = filter_var($_POST['long_desc'],FILTER_SANITIZE_STRING);
+		$comments = filter_var($_POST['comments'],FILTER_SANITIZE_STRING);
+		$owner_name = filter_var($_POST['owner_name'],FILTER_SANITIZE_STRING);
+		$name_e = filter_var($_POST['name_e'],FILTER_SANITIZE_STRING);
+		$name_p = filter_var($_POST['name_p'],FILTER_SANITIZE_STRING);
+		$telephone_p = filter_var($_POST['telephone_p'],FILTER_SANITIZE_NUMBER_FLOAT);
+		$comments_p = filter_var($_POST['comments_p'],FILTER_SANITIZE_STRING);
+		$website_p = filter_var($_POST['website_p'],FILTER_SANITIZE_STRING);
+		$support_p = filter_var($_POST['support_p'],FILTER_SANITIZE_STRING);
+		$location_e = filter_var($_POST['location_e'],FILTER_SANITIZE_STRING);
+		$serial_number = filter_var($_POST['serial_number'],FILTER_SANITIZE_NUMBER_FLOAT);
+		$buy_year_e = filter_var($_POST['buy_year_e'],FILTER_SANITIZE_NUMBER_FLOAT);
+		$buy_method_e = filter_var($_POST['buy_method_e'],FILTER_SANITIZE_STRING);
+		$owner_name = filter_var($_POST['owner_name'],FILTER_SANITIZE_STRING);
 		try{
 			$add_departmentSQL = "UPDATE department_svds SET  name_dep= :name_dep, telephone_dep= :telephone_dep  WHERE id_dep= :depID ";
 			$add_departmentSTMT = $db->prepare($add_departmentSQL);
 			$add_departmentSTMT->bindParam(':depID', $depID, PDO::PARAM_INT); 			
- 			$add_departmentSTMT->bindParam(':name_dep', $_POST['name_dep']);
- 			$add_departmentSTMT->bindParam(':telephone_dep', $_POST['telephone_dep']);
+ 			$add_departmentSTMT->bindParam(':name_dep', $name_dep);
+ 			$add_departmentSTMT->bindParam(':telephone_dep', $telephone_dep);
  			$add_departmentSTMT->execute();
 
 			$add_descriptionSQL = "UPDATE description_svds SET short_desc= :short_desc, long_desc= :long_desc WHERE id_desc= :descID";
 			$add_descriptionSTMT = $db->prepare($add_descriptionSQL);
 			$add_descriptionSTMT->bindParam(':descID', $descID, PDO::PARAM_INT);
-		    $add_descriptionSTMT->bindParam(':short_desc', $_POST['short_desc']);
-		    $add_descriptionSTMT->bindParam(':long_desc', $_POST['long_desc']);
+		    $add_descriptionSTMT->bindParam(':short_desc', $short_desc);
+		    $add_descriptionSTMT->bindParam(':long_desc', $long_desc);
 		    $add_descriptionSTMT->execute();	
 
 			$add_commentSQL = "UPDATE comments_svds SET id_equip_com= :id_equip_com, id_user_com= :id_user_com, comments= :comments, date_com= NOW() WHERE id_comment= :comID";
 			$add_commentSTMT = $db->prepare($add_commentSQL);
 			$add_commentSTMT->bindParam(':comID', $comID, PDO::PARAM_INT);
-			$add_commentSTMT->bindParam(':comments', $_POST['comments']);
+			$add_commentSTMT->bindParam(':comments', $comments);
 			$add_commentSTMT->bindParam(':id_equip_com', $idToChange);
 			$add_commentSTMT->bindParam(':id_user_com', $_SESSION['aem']);
 			$add_commentSTMT->execute();
@@ -49,12 +61,12 @@ include("views/navbar.php");
 			$add_providerSQL = "UPDATE provider_svds SET name_p= :name_p, telephone_p= :telephone_p, website_p= :website_p, email_p= :email_p, support_p= :support_p, comments_p= :comments_p WHERE id_p= :provID";
 			$add_providerSTMT = $db->prepare($add_providerSQL);
 			$add_providerSTMT->bindParam(':provID', $provID, PDO::PARAM_INT);
-			$add_providerSTMT->bindParam(':name_p', $_POST['name_p']);
-			$add_providerSTMT->bindParam(':telephone_p', $_POST['telephone_p']);
-			$add_providerSTMT->bindParam(':website_p', $_POST['website_p']);
+			$add_providerSTMT->bindParam(':name_p', $name_p);
+			$add_providerSTMT->bindParam(':telephone_p', $telephone_p);
+			$add_providerSTMT->bindParam(':website_p', $website_p);
 			$add_providerSTMT->bindParam(':email_p', $_POST['email_p']);
-			$add_providerSTMT->bindParam(':support_p', $_POST['support_p']);
-			$add_providerSTMT->bindParam(':comments_p', $_POST['comments_p']);
+			$add_providerSTMT->bindParam(':support_p', $support_p);
+			$add_providerSTMT->bindParam(':comments_p', $comments_p);
 			$add_providerSTMT->execute();		
 			
 			if ($_POST['retired'] == "Δεν έχει αποσυρθεί"){
@@ -72,23 +84,23 @@ include("views/navbar.php");
 			$add_equipmentSQL = "UPDATE equip_svds SET name_e= :name_e, buy_method_e= :buy_method_e, buy_year_e= :buy_year_e, owner_name= :owner_name, department= :department, provider_e= :provider_e, isborrowed= :isborrowed, comment_e= :comment_e, retired= :retired, short_desc_e= :short_desc_e, location_e= :location_e, serial_number= :serial_number WHERE id_equip= :idToChange";
 			$add_equipmentSTMT = $db->prepare($add_equipmentSQL);
 			$add_equipmentSTMT->bindParam(':idToChange', $idToChange, PDO::PARAM_INT);
-		    $add_equipmentSTMT->bindParam(':name_e', $_POST['name_e']);
-		    $add_equipmentSTMT->bindParam(':buy_method_e', $_POST['buy_method_e']);
-		    $add_equipmentSTMT->bindParam(':buy_year_e', $_POST['buy_year_e']);
-		    $add_equipmentSTMT->bindParam(':owner_name', $_POST['owner_name']);
+		    $add_equipmentSTMT->bindParam(':name_e', $name_e);
+		    $add_equipmentSTMT->bindParam(':buy_method_e', $buy_method_e);
+		    $add_equipmentSTMT->bindParam(':buy_year_e', $buy_year_e);
+		    $add_equipmentSTMT->bindParam(':owner_name', $owner_name);
 		    $add_equipmentSTMT->bindParam(':department', $depID);
 		    $add_equipmentSTMT->bindParam(':provider_e', $provID);
 		    $add_equipmentSTMT->bindParam(':isborrowed', $conditionState);
 		    $add_equipmentSTMT->bindParam(':comment_e', $comID);
 		    $add_equipmentSTMT->bindParam(':retired', $retiredState);
 		    $add_equipmentSTMT->bindParam(':short_desc_e', $descID);
-		    $add_equipmentSTMT->bindParam(':location_e', $_POST['location_e']);
-		    $add_equipmentSTMT->bindParam(':serial_number', $_POST['serial_number']);
+		    $add_equipmentSTMT->bindParam(':location_e', $location_e);
+		    $add_equipmentSTMT->bindParam(':serial_number', $serial_number);
 		    $add_equipmentSTMT->execute();
 
 		   
 
-		   	echo '<div clas="container"><br><a class="p-3 mb-2 bg-success text-white">Επιτυχείς καταχώρηση αποτελεσμάτων</a><br><br></div>';
+		   	echo '<div clas="container"><br><a class="p-3 mb-2 bg-success text-white">Επιτυχής καταχώρηση αποτελεσμάτων</a><br><br></div>';
 		   	echo '<meta http-equiv="refresh" content="0; URL=equipment_manage.php">';		    
 		}
 		catch(PDOException $e)

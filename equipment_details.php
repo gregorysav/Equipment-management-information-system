@@ -3,7 +3,6 @@ include("variables_file.php");
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-	if ($_SESSION['email']){	
 		if (isset($_GET['id_equip'])){
 		 	$idToShow= filter_var($_GET['id_equip'],FILTER_SANITIZE_NUMBER_FLOAT);
 		 	$equipQuerySQL = "SELECT * FROM equip_svds WHERE id_equip= :idToShow";
@@ -39,25 +38,26 @@ include("views/navbar.php");
 						}
 				 			echo '
 					 			<div class="container">
+					 			<br>
 					 				<div class="row">
-					 					<div class="col-md-8">
+					 					<div class="col-md-8 border rounded">
 						 				  <h4>Πληροφορίες Εξαρτήματος </h4>   
 										    <img class="card-img-top equipmentDetailsImage" src="uploadedImages/'.$imageHashedName.'" alt="Card image cap">
 										    <div class="card-body">
-											    <h3 class="card-title">'.$equipQuerySTMTResult['name_e'].'</h3>
+											    <h4 class="card-title">'.$equipQuerySTMTResult['name_e'].'<button type="submit" class="btn btn-secondary add_to_basket" name_basket="'.$equipQuerySTMTResult['name_e'].'" id_user_basket='.$_SESSION['aem'].' id_equip_basket='.$equipQuerySTMTResult['id_equip'].'>Καλάθι</button></h4>
 											    <p class="card-text">Τοποθεσία: '.$equipQuerySTMTResult['location_e'].'</p>
 											    <p class="card-text">Τμήμα: '.$departmentQuerySTMTResult['name_dep'].' Πάροχος: '.$providerQuerySTMTResult['name_p'].'</p>
 											    <p class="card-text">Σειριακός Αρ.: '.$equipQuerySTMTResult['serial_number'].' Κατάσταση: '.$condition.'</p>
-											    <p class="card-text"><small class="text-muted">Σύντομη Περιγραφή: '.$descriptionQuerySTMTResult['short_desc'].' Εκτενείς Περιγραφή: '.$descriptionQuerySTMTResult['long_desc'].'</small></p>
-											    <p class="card-text extraComment"><button type="submit">Προσθέστε Σχόλιο</button></p>
+											    <p class="card-text"><small class="text-muted">Σύντομη Περιγραφή: '.$descriptionQuerySTMTResult['short_desc'].'</small></p>
+											    <p class="card-text"><small class="text-muted">Εκτενής Περιγραφή: '.$descriptionQuerySTMTResult['long_desc'].'</small></p>
+											    <p class="card-text extraComment"><button class="btn btn-secondary" type="submit">Προσθέστε Σχόλιο</button></p>
 									    	</div>
 									    	<form class="form-inline" method="POST" id="newComment">
-												<textarea name="newComment" id="commentArea">
-												</textarea><br>
-												<button type="submit">Καταχώρηση Σχολίου</button> 
+												<textarea name="newComment" id="commentArea"></textarea><br>
+												<button id="commentAreaButton" type="submit">Καταχώρηση Σχολίου</button> 
 											</form>
 										</div>
-										<div class="col-md-4">
+										<div class="col-md-4 border rounded">
 											<h4>Πρόσφατα Σχόλια</h4>
 							';
 											$commentsDisplayQuerySQL = "SELECT * FROM comments_svds WHERE id_equip_com= :idToShow ORDER BY date_com DESC LIMIT 3";
@@ -102,7 +102,7 @@ include("views/navbar.php");
 			    if ($commentQuerySTMT->execute()){
 			      	echo '
 			       		<div class="container">
-			       		Επιτυχείς εισαγωγή σχολίου.
+			       		Επιτυχής εισαγωγή σχολίου.
 			       		</div>
 			       		<meta http-equiv="refresh" content="0.5">
 			       	';							       
@@ -114,8 +114,7 @@ include("views/navbar.php");
 		 		<h3>Εμφανίστηκε πρόβλημα προσπαθήστε ξανά.</h3>
 		 		</div>
 		 	';
-		 }
-	}	 
+		 }	 
 
 include("views/footer.php");
 ?>

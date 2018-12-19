@@ -3,7 +3,7 @@ include("variables_file.php");
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-	if ($_SESSION['email']){
+	
 		if ($type == 1){
 			echo '
 				<div class="container" id="tableEquipment">
@@ -16,18 +16,21 @@ include("views/navbar.php");
 			';
 		}
 
-
         if (isset($_GET['p'])){
-            $pageOfPagination = $_GET['p'];
+        	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
             $startPagination = ($pageOfPagination- 1) * $limitPagination;
         }
 
-		$equipQuerySQL = "SELECT * FROM equip_svds LIMIT $startPagination, $limitPagination";
-		$equipQuerySTMT = $db->prepare($equipQuerySQL); 
+		$equipQuerySQL = "SELECT * FROM equip_svds LIMIT :startPagination, :limitPagination";
+		$equipQuerySTMT = $db->prepare($equipQuerySQL);
+		$equipQuerySTMT->bindParam(':startPagination', $startPagination, PDO::PARAM_INT);
+		$equipQuerySTMT->bindParam(':limitPagination', $limitPagination, PDO::PARAM_INT); 
 	 	$equipQuerySTMT->execute();
+	 	
 	 	echo '
  				<div class="container">
- 					<div class="form-inline" id="searchHolder">
+ 					<h3 id="title">Διαθέσιμος Εξοπλισμός Εργαστηρίου</h3><br>
+ 					<div class="form-inline" id="searchHolder"> 					
  						Αναζήτηση:	
  					  	<form name="form" method="get">
   						<input type="text" name="equipmentName"  class="form-control input-lg" id="equipmentName" autocomplete="off" placeholder="Όνομα εξαρτήματος"/>
@@ -46,6 +49,7 @@ include("views/navbar.php");
 					    <th scope="col">Όνομα</th>
 					    <th scope="col">Έτος απόκτησης</th>
 					    <th scope="col">Τοποθεσία</th>
+					    <th scope="col">Σύντομη Περιγραφή</th>
 					</tr>
 					</thead>
 		';
@@ -59,23 +63,31 @@ include("views/navbar.php");
 			 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
 			 	}
 		 		if (($equipQuerySTMTResult['quantity']) > 0 ){
-		 		echo '
-	 						  <tbody>
-	 						  <tr>
-						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
-						      <td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'>'.$equipQuerySTMTResult['name_e'].'</a></td>
-						      <td>'.$equipQuerySTMTResult['buy_year_e'].'</td>
-						      <td>'.$equipQuerySTMTResult['location_e'].'</td>
-						      </tr>
-						      </tbody>
-				';
+		 			$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
+					$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
+					$descriptionQuerySTMT->bindParam(':idDesc', $equipQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
+				 	$descriptionQuerySTMT->execute();
+				 	$descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC);
+			 		echo '
+	 						<tbody>
+	 						<tr>
+						    <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
+						    <td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'>'.$equipQuerySTMTResult['name_e'].'</a></td>
+						    <td>'.$equipQuerySTMTResult['buy_year_e'].'</td>
+						    <td>'.$equipQuerySTMTResult['location_e'].'</td>
+						    <td>'.$equipQuerySTMTResult['location_e'].'</td>
+						    <td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
+						    </tr>
+						    </tbody>
+					';
 				}
 			}
 		}
 		if (isset($_GET['equipmentName'])){
+			$equipmentName = filter_var($_GET['equipmentName'],FILTER_SANITIZE_STRING);
     		$searchQuerySQL = "SELECT * FROM equip_svds WHERE name_e LIKE :keyword";
     		$searchQuerySTMT = $db->prepare($searchQuerySQL);	
-    		$searchQuerySTMT->bindParam(':keyword', $_GET['equipmentName']); 
+    		$searchQuerySTMT->bindParam(':keyword', $equipmentName); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$searchQuerySTMTResult['hash_filename']){
@@ -83,22 +95,29 @@ include("views/navbar.php");
 			 	}else {
 			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
 			 	}
+			 	$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
+				$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
+				$descriptionQuerySTMT->bindParam(':idDesc', $searchQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
+				$descriptionQuerySTMT->execute();
+				$descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC);
 				echo '
-	 						  <tbody>
-	 						  <tr>
-						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
-						      <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
-						      <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
-						      <td>'.$searchQuerySTMTResult['location_e'].'</td>
-						      </tr>
-						      </tbody>
+	 						<tbody>
+	 						<tr>
+						    <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
+						    <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
+						    <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
+						    <td>'.$searchQuerySTMTResult['location_e'].'</td>
+					    	<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
+						    </tr>
+						    </tbody>
 				';
 			}
 
     	}elseif (isset($_GET['yearOfBuy'])) {
+    		$yearOfBuy= filter_var($_GET['yearOfBuy'],FILTER_SANITIZE_NUMBER_FLOAT);
 			$searchQuerySQL = "SELECT * FROM equip_svds WHERE buy_year_e LIKE :keyword";
 			$searchQuerySTMT = $db->prepare($searchQuerySQL);
-    		$searchQuerySTMT->bindParam(':keyword', $_GET['yearOfBuy']); 
+    		$searchQuerySTMT->bindParam(':keyword', $yearOfBuy); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$searchQuerySTMTResult['hash_filename']){
@@ -106,21 +125,28 @@ include("views/navbar.php");
 			 	}else {
 			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
 			 	}
+			 	$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
+				$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
+				$descriptionQuerySTMT->bindParam(':idDesc', $searchQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
+				$descriptionQuerySTMT->execute();
+				$descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC);
 				echo '
-	 						  <tbody>
-	 						  <tr>
-						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
-						      <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
-						      <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
-						      <td>'.$searchQuerySTMTResult['location_e'].'</td>
-						      </tr>
-						      </tbody>
+	 						<tbody>
+	 						<tr>
+						    <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
+						    <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
+						    <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
+						    <td>'.$searchQuerySTMTResult['location_e'].'</td>
+					   		<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
+						    </tr>
+						    </tbody>
 				';
 			}
     	}elseif (isset($_GET['locationName'])) {
+    		$locationName = filter_var($_GET['locationName'],FILTER_SANITIZE_STRING);
     		$searchQuerySQL = "SELECT * FROM equip_svds WHERE location_e LIKE :keyword";
     		$searchQuerySTMT = $db->prepare($searchQuerySQL);
-    		$searchQuerySTMT->bindParam(':keyword', $_GET['locationName']); 
+    		$searchQuerySTMT->bindParam(':keyword', $locationName); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$searchQuerySTMTResult['hash_filename']){
@@ -128,15 +154,21 @@ include("views/navbar.php");
 			 	}else {
 			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
 			 	}
+			 	$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
+				$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
+				$descriptionQuerySTMT->bindParam(':idDesc', $searchQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
+				$descriptionQuerySTMT->execute();
+				$descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC);
 				echo '
-	 						  <tbody>
-	 						  <tr>
-						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
-						      <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
-						      <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
-						      <td>'.$searchQuerySTMTResult['location_e'].'</td>
-						      </tr>
-						      </tbody>
+	 						<tbody>
+	 						<tr>
+						    <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
+						    <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
+						    <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
+						    <td>'.$searchQuerySTMTResult['location_e'].'</td>
+					    	<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
+						    </tr>
+						    </tbody>
 				';
 			}
     	}else {
@@ -147,16 +179,22 @@ include("views/navbar.php");
 			 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
 			 	}
 		 		if (($equipQuerySTMTResult['quantity']) > 0 ){
-		 		echo '
-	 						  <tbody>
-	 						  <tr>
-						      <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
-						      <td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'>'.$equipQuerySTMTResult['name_e'].'</a></td>
-						      <td>'.$equipQuerySTMTResult['buy_year_e'].'</td>
-						      <td>'.$equipQuerySTMTResult['location_e'].'</td>
-						      </tr>
-						      </tbody>
-				';
+		 			$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
+					$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
+					$descriptionQuerySTMT->bindParam(':idDesc', $equipQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
+					$descriptionQuerySTMT->execute();
+					$descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC);
+			 		echo '
+		 						<tbody>
+		 						<tr>
+							    <td><img src="uploadedImages/'.$imageHashedName.'"/></td>
+							    <td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'>'.$equipQuerySTMTResult['name_e'].'</a></td>
+							    <td>'.$equipQuerySTMTResult['buy_year_e'].'</td>
+							    <td>'.$equipQuerySTMTResult['location_e'].'</td>
+						    	<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
+							    </tr>
+					            </tbody>
+					';				
 				}
 			}
 		}
@@ -198,12 +236,6 @@ include("views/navbar.php");
           	</table>
             </div>
         ';
-
-
-	} else {
-		header("Location: index.php");
-		die("Δεν έχετε συνδεθεί");
-	}
 
 include("views/footer.php");
 ?>

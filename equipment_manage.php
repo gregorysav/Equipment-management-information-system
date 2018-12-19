@@ -4,14 +4,6 @@ include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
 
-
-	if (!isset($_SESSION['email'])){
-
-		header("Location: index.php");
-		die("Δεν έχετε συνδεθεί");
-	}	
-		
-
 	try{
 	 
 		$equipQuerySQL = "SELECT * FROM equip_svds";
@@ -19,12 +11,14 @@ include("views/navbar.php");
 		$equipQuerySTMT->execute();
 
 		if (isset($_GET['p'])){
-            $pageOfPagination = $_GET['p'];
+        	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
             $startPagination = ($pageOfPagination- 1) * $limitPagination;
         }
 
-        $equipQuerySQL = "SELECT * FROM equip_svds LIMIT $startPagination, $limitPagination";
-		$equipQuerySTMT = $db->prepare($equipQuerySQL); 
+		$equipQuerySQL = "SELECT * FROM equip_svds LIMIT :startPagination, :limitPagination";
+		$equipQuerySTMT = $db->prepare($equipQuerySQL);
+		$equipQuerySTMT->bindParam(':startPagination', $startPagination, PDO::PARAM_INT);
+		$equipQuerySTMT->bindParam(':limitPagination', $limitPagination, PDO::PARAM_INT); 
 	 	$equipQuerySTMT->execute();
 
 		echo '
@@ -78,9 +72,10 @@ include("views/navbar.php");
 		}
 
 		if (isset($_GET['equipmentName'])){
+			$equipmentName = filter_var($_GET['equipmentName'],FILTER_SANITIZE_STRING);
     		$searchQuerySQL = "SELECT * FROM equip_svds WHERE name_e LIKE :keyword";
     		$searchQuerySTMT = $db->prepare($searchQuerySQL);	
-    		$searchQuerySTMT->bindParam(':keyword', $_GET['equipmentName']); 
+    		$searchQuerySTMT->bindParam(':keyword', $equipmentName); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$searchQuerySTMTResult['hash_filename']){
@@ -102,9 +97,10 @@ include("views/navbar.php");
 			}
 
     	}elseif (isset($_GET['yearOfBuy'])) {
+			$yearOfBuy= filter_var($_GET['yearOfBuy'],FILTER_SANITIZE_NUMBER_FLOAT);
 			$searchQuerySQL = "SELECT * FROM equip_svds WHERE buy_year_e LIKE :keyword";
 			$searchQuerySTMT = $db->prepare($searchQuerySQL);
-    		$searchQuerySTMT->bindParam(':keyword', $_GET['yearOfBuy']); 
+    		$searchQuerySTMT->bindParam(':keyword', $yearOfBuy); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$searchQuerySTMTResult['hash_filename']){
@@ -125,9 +121,10 @@ include("views/navbar.php");
 				';
 			}
     	}elseif (isset($_GET['locationName'])) {
+			$locationName = filter_var($_GET['locationName'],FILTER_SANITIZE_STRING);
     		$searchQuerySQL = "SELECT * FROM equip_svds WHERE location_e LIKE :keyword";
     		$searchQuerySTMT = $db->prepare($searchQuerySQL);
-    		$searchQuerySTMT->bindParam(':keyword', $_GET['locationName']); 
+    		$searchQuerySTMT->bindParam(':keyword', $locationName); 
     		$searchQuerySTMT->execute();
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$searchQuerySTMTResult['hash_filename']){
@@ -214,5 +211,4 @@ include("views/navbar.php");
 	} 
 
 include("views/footer.php");
-
 ?>

@@ -14,7 +14,7 @@ include("views/navbar.php");
 				echo '<div class="container">Δεν βρέθηκαν δανεισμοί προς επιβεβαίωση.</div>';
 	}else { 
 		while($confirmQuerySTMTResult=$confirmQuerySTMT->fetch(PDO::FETCH_ASSOC)){
-			$borrowExplanationMessage = "Αρχικός Δανεισμός";	
+			$borrowExplanationMessage = "Αρχική Χρέωση : ".' '.$confirmQuerySTMTResult['borrow_reason'];	
 			if ($confirmQuerySTMTResult['extend_reason'] != NULL){
 				$borrowExplanationMessage = $confirmQuerySTMTResult['extend_reason'];
 			}
@@ -36,7 +36,7 @@ include("views/navbar.php");
 						<ul>
 							<li>'.$equipBorrowQuerySTMTResult['name_e'].'</li>
 						</ul>
-						από '.$confirmQuerySTMTResult['start_date'].' μέχρι '.$confirmQuerySTMTResult['expire_date'].' <br>
+						από '.date('d/m/Y',strtotime($confirmQuerySTMTResult['start_date'])).' μέχρι '.date('d/m/Y',strtotime($confirmQuerySTMTResult['expire_date'])).' <br>
 						<textarea id="borrowExplain">'.$borrowExplanationMessage.'</textarea><br>
 						<button class="btn btn-primary confirm" id_to_confirm='.$confirmQuerySTMTResult['id_borrow'].'>Επιβεβαίωση</button>
 						</div> 

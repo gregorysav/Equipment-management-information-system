@@ -23,5 +23,5 @@ echo '
 	</div>	
 ';	
 
-include("views/footer.php");
+// include("views/footer.php");
 ?>

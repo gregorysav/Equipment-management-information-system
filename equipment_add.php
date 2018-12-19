@@ -4,11 +4,6 @@ include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
 
-	if (!isset($_SESSION['email'])){
-
-		header("Location: index.php");
-		die("Δεν έχετε συνδεθεί");
-	}	
 		
 	$departmentQuerySQL = "SELECT * FROM department_svds";
 	$departmentQuerySTMT = $db->prepare($departmentQuerySQL);
@@ -26,6 +21,12 @@ include("views/navbar.php");
 
 
 	if(isset($_POST['add'])){
+		$short_desc = filter_var($_POST['short_desc'],FILTER_SANITIZE_STRING);	
+		$comments = filter_var($_POST['comments'],FILTER_SANITIZE_STRING);
+		$owner_name = filter_var($_POST['owner_name'],FILTER_SANITIZE_STRING);
+		$name_e = filter_var($_POST['name_e'],FILTER_SANITIZE_STRING);
+		$location_e = filter_var($_POST['location_e'],FILTER_SANITIZE_STRING);
+		$serial_number = filter_var($_POST['serial_number'],FILTER_SANITIZE_NUMBER_FLOAT);
 
 	try{
 		
@@ -34,18 +35,17 @@ include("views/navbar.php");
 		$providerID = array_search($_POST['name_p'], $providersNameArray);
 		$providerID++;
 
-		$add_descriptionSQL = "INSERT INTO description_svds (short_desc, long_desc) 
-    VALUES (:short_desc, :long_desc)";
+		$add_descriptionSQL = "INSERT INTO description_svds (short_desc) 
+    VALUES (:short_desc)";
 		$add_descriptionSTMT = $db->prepare($add_descriptionSQL);
-		$add_descriptionSTMT->bindParam(':short_desc', $_POST['short_desc']);
-		$add_descriptionSTMT->bindParam(':long_desc', $_POST['long_desc']);
+		$add_descriptionSTMT->bindParam(':short_desc', $short_desc);
 		$add_descriptionSTMT->execute();	
 		$descriptionID = $db->lastInsertId();
 
 		$add_commentSQL = "INSERT INTO comments_svds (id_equip_com, id_user_com, comments, date_com) 
     VALUES (:id_equip_com, :id_user_com, :comments, NOW())";
 		$add_commentSTMT = $db->prepare($add_commentSQL);
-		$add_commentSTMT->bindParam(':comments', $_POST['comments']);
+		$add_commentSTMT->bindParam(':comments', $comments);
 		$add_commentSTMT->bindParam(':id_equip_com', $equipID);
 		$add_commentSTMT->bindParam(':id_user_com', $_SESSION['aem']);
 		$add_commentSTMT->execute();
@@ -72,8 +72,8 @@ include("views/navbar.php");
 		$add_equipmentSQL = "INSERT INTO equip_svds (name_e, owner_name, department, provider_e, isborrowed, comment_e, quantity, retired, short_desc_e, location_e, serial_number) 
     VALUES (:name_e, :owner_name, :department, :provider_e, :isborrowed, :comment_e, :quantity, :retired, :short_desc_e, :location_e, :serial_number)";
 		$add_equipmentSTMT = $db->prepare($add_equipmentSQL);
-		$add_equipmentSTMT->bindParam(':name_e', $_POST['name_e']);
-		$add_equipmentSTMT->bindParam(':owner_name', $_POST['owner_name']);
+		$add_equipmentSTMT->bindParam(':name_e', $name_e);
+		$add_equipmentSTMT->bindParam(':owner_name', $owner_name);
 		$add_equipmentSTMT->bindParam(':department', $departmentID);
 		$add_equipmentSTMT->bindParam(':provider_e', $providerID);
 		$add_equipmentSTMT->bindParam(':isborrowed', $conditionState);
@@ -81,8 +81,8 @@ include("views/navbar.php");
 		$add_equipmentSTMT->bindParam(':quantity', $quantity);
 		$add_equipmentSTMT->bindParam(':retired', $retiredState);
 		$add_equipmentSTMT->bindParam(':short_desc_e', $descriptionID);
-		$add_equipmentSTMT->bindParam(':location_e', $_POST['location_e']);
-		$add_equipmentSTMT->bindParam(':serial_number', $_POST['serial_number']);
+		$add_equipmentSTMT->bindParam(':location_e', $location_e);
+		$add_equipmentSTMT->bindParam(':serial_number', $serial_number);
 		$add_equipmentSTMT->execute();
 		$equipID = $db->lastInsertId();
 
