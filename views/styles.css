@@ -7,15 +7,14 @@ body {
 }
 
 #logInForm {
-      text-align: center;
-      width: 400px;
-      margin-top: 100px;
+    text-align: center;
+    width: 400px;
+    margin-top: 100px;
 }
 
 .message {
-
-	 text-align: center;
-     width: 400px;
+	text-align: center;
+    width: 400px;
 
 }
 
@@ -92,10 +91,11 @@ td a {
 
 #dropDown a {
 	background-color: #212529;
+	color: white;
 }
 
 #dropDown a:hover {
-	background-color: white;
+	background-color: #212529;
 }
 
 #dropDownButton a:hover {
@@ -207,15 +207,9 @@ hr {
 }
 
 #footerMessage{
-	position: fixed;
-	font-size: 12px;
-	font-family: monospace;
-	letter-spacing: 1px;
-	padding-left: 25px;
-  	height:10px;
-  	right:auto;
-  	left:auto;
-  	bottom: 5px;
+  	padding-top: 25px; 
+  	font-size: 12px;
+  	text-align: center;
 }
 
 #footerMessage a:visited{
@@ -277,8 +271,8 @@ tr{
 }
 
 .equipmentDetailsImage {
-	width: 250px;
-	height: 230px;
+	width: 300px;
+	height: 280px;
 }
 
 #newComment {
@@ -297,3 +291,24 @@ tr{
   list-style: none;
   border-radius: 0.25rem;
 }
+
+#title {
+	text-align: center;
+}
+
+#aemSearch {
+	width: 350px;
+	text-align: center;
+}
+
+.list-unstyled ul {
+  background-color: #eee;
+  cursor: pointer;
+}
+
+.list-unstyled li {
+    padding: 10px;
+    background-color: #eee;
+    text-align: left;
+}
+

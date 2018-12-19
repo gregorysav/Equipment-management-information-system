@@ -35,7 +35,7 @@
 		$.ajax({
             type: "POST",
             url: "functions.php?function=basket",
-            data: "name_basket=" + $(this).attr("name_basket") + "&id_equip_basket=" + $(this).attr("id_equip_basket") + "&id_user_basket=" + $(this).attr("id_user_basket"),
+            data: "name_basket=" + encodeURIComponent($(this).attr("name_basket"))  + "&id_equip_basket=" + $(this).attr("id_equip_basket") + "&id_user_basket=" + $(this).attr("id_user_basket"),
             success: function(result) {
                 window.location.reload("views/navbar.php");
                 window.location.reload();
@@ -161,52 +161,68 @@
 	
 	$(document).ready(function(){
  
-		$('#aemBorrow').typeahead({
-	  		source: function(query, result)
-	  		{
+		$('#aemBorrow').keyup(function(){ 
+			var query = $(this).val();
+			if (query != ''){
 	   			$.ajax({
 				    url:"functions.php?function=AEMQuery",
 				    method:"POST",
 				    data:{query:query},
-				    dataType:"json",
 				    success:function(data)
 				    {
-				     result($.map(data, function(item){
-				      return item;
-				     }));
+				    	$('#aemTotal').fadeIn();
+				    	$('#aemTotal').html(data);
 	    			}
-	   			})
+	   			});
+	  		}else {
+	  			$('#aemTotal').fadeOut();
+	  			$('#aemTotal').html("");
 	  		}
 	 	});
+	 	$(document).on('click', 'li', function(){
+	 		$('#aemBorrow').val($(this).text());
+	 		$('#aemTotal').fadeOut();
+	 	});	
 	 
-	});	
+	});
+
+	$(document).ready(function(){
+ 
+	  	$('#idToPrintPDF').keyup(function(){ 
+			var query = $(this).val();
+			if (query != ''){
+	   			$.ajax({
+				    url:"functions.php?function=AEMQuery",
+				    method:"POST",
+				    data:{query:query},
+				    success:function(data)
+				    {
+				    	$('#aemTotal').fadeIn();
+				    	$('#aemTotal').html(data);
+	    			}
+	   			});
+	  		}else {
+	  			$('#aemTotal').fadeOut();
+	  			$('#aemTotal').html("");
+	  		}
+	 	});
+	 	
+	 	$(document).on('click', 'li', function(){
+	 		$('#idToPrintPDF').val($(this).text());
+	 		$('#aemTotal').fadeOut();
+	 	});	 
+	});
+		
 
 	$(".extraComment").click(function() {
 		$("#newComment").css("visibility", "visible");
 		$(".extraComment").css("visibility", "hidden");
+		$("#commentAreaButton").addClass("btn btn-secondary");
 	});
 
  	
  	$("#delete").click(function() {
 		window.location = "equipment_manage.php";
-	});
-
-	$("#pdfPrint").click(function() {
-  		var answerAEM = prompt("Δώσε ΑΕΜ χρήστη για την εκτύπωση εντύπου δανεισμού:");
-  		if (answerAEM){
-  			$.ajax({
-            type: "GET",
-            url: "pdf_print_teacher.php",
-            data: "",
-            success: function(result) {
-                    window.location = "pdf_print_teacher.php?aemBorrower=" + answerAEM;
-                }
-                 
-           })
-  		}else{
-  			alert("Δεν έχετε εισάγει το ΑΕΜ του χρήστη.");
-  			window.location.reload();
-  		}
 	});
 
 	$(".returnEquipment").click(function() {
@@ -223,6 +239,7 @@
            })
   		}
 	});
+
 	
 </script>
 

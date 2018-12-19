@@ -34,8 +34,8 @@ if ($_SESSION['type'] == 1) {
     </button>
     <div class="dropdown-menu" id="dropDown">
       <a class="dropdown-item" href="confirmation.php">Επιβεβαίωση Δανεισμών</a>
-      <a class="dropdown-item" href="backend.php">Όλοι οι Δανεισμοί</a>
-      <a class="dropdown-item" id="pdfPrint" href="">Εκτύπωση Εντύπου</a>
+      <a class="dropdown-item" href="equipment_return.php">Όλοι οι Δανεισμοί</a>
+      <a class="dropdown-item" href="find_user.php">Εκτύπωση Εντύπου</a>
     </div>
     </div>
 
@@ -58,7 +58,7 @@ $basketItems= $basketQuerySTMT->rowCount();
 echo'     
     </ul>
     <div class="form-inline my-2 my-lg-0" id="navbarButtons">
-        <a href="basket.php" class="fas fa-shopping-basket">('.$basketItems.') Καλάθι </a>
+        <a href="basket.php" class="fas fa-shopping-basket">('.$basketItems.') Καλάθι |</a>
         <a href="logout.php" class="fas fa-sign-out-alt">  Αποσύνδεση</a>
     </div>
     </div>      
