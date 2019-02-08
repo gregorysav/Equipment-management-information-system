@@ -1,5 +1,10 @@
 <?php
+//Access: Registered Users
 include("variables_file.php");
+echo '
+    <!DOCTYPE html>
+    <html lang="en">
+';
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
@@ -7,18 +12,18 @@ include("views/navbar.php");
 
 $basketQuerySQL = "SELECT * FROM basket_svds WHERE id_user_basket= :idUser";
 $basketQuerySTMT = $db->prepare($basketQuerySQL); 
-$basketQuerySTMT->bindParam(':idUser', $_SESSION['id'], PDO::PARAM_INT);
+$basketQuerySTMT->bindParam(':idUser', $id, PDO::PARAM_INT);
 $basketQuerySTMT->execute();
 echo '
-    <div class="container" id="basket_container">
+    <div class="container" id="baskePageContainer">
     <h3>Το καλάθι μου</h3>
 ';
 $basketQuerySTMTResult=$basketQuerySTMT->rowCount();
 if ($basketQuerySTMTResult == 0){
-  echo "Αυτή τη στιγμή το καλάθι είναι άδειο.";
+  echo '<div class="container"><p class="alert alert-info">Αυτή τη στιγμή το καλάθι είναι άδειο.</p></div>';
 }else{
     echo '  
-        <table class="table table-bordered" id="basket">
+        <table class="table table-bordered" id="baskePageTable">
         <thead class="thead-dark">
         <tr>
         <th>ID</th>
@@ -28,7 +33,7 @@ if ($basketQuerySTMTResult == 0){
         </thead>
     ';
     echo '
-        <div class="basket_buttons">
+        <div class="basketPageButtons">
         <button type="submit" class="btn btn-primary" id="clear" id_user_basket='.$_SESSION['id'].'>Καθαρισμός</button>
         <button type="submit" class="btn btn-primary" id="complete">Ολοκλήρωση</button>
         </div><br>
@@ -41,7 +46,7 @@ while($basketQuerySTMTResult=$basketQuerySTMT->fetch(PDO::FETCH_ASSOC)){
         <tr>
         <td>'.$basketQuerySTMTResult['id_equip_basket'].'</td>
         <td>'.$basketQuerySTMTResult['name_basket'].'</td>
-        <td><a href="functions.php?function=remove&id_basket='.$basketQuerySTMTResult['id_basket'].'&id_user_basket='.$_SESSION['id'].'"><p><span class="fa fa-minus-circle"></span></p></a></td>
+        <td><a href="functions.php?function=removeFromBasket&id_basket='.$basketQuerySTMTResult['id_basket'].'&id_user_basket='.$_SESSION['id'].'&id_equip_basket='.$basketQuerySTMTResult['id_equip_basket'].'"><p><span class="fa fa-minus-circle"></span></p></a></td>
         </tr>
         </tbody>
     ';
@@ -49,4 +54,8 @@ while($basketQuerySTMTResult=$basketQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 echo '</table>';
     
 include("views/footer.php");
+echo '
+    </body>
+    </html>
+';
 ?>

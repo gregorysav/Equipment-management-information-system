@@ -1,8 +1,13 @@
 <?php
+//Access: Public/Everyone
 if(!isset($_SESSION)) 
 { 
     session_start(); 
 }
+echo '
+  <!DOCTYPE html>
+  <html lang="en">
+';
 include("views/connection.php");
 include("views/header.php");
 if (array_key_exists("logout", $_GET)){
@@ -11,7 +16,7 @@ if (array_key_exists("logout", $_GET)){
 	header("Location: index.php");
   die("Δεν έχετε συνδεθεί");
 }
-
+	
 
 if(isset($_POST['email'])){
 
@@ -72,5 +77,9 @@ $db = null;
   '; 
 
 
-// include("views/footer.php"); 
+include("views/footer.php");
+echo '
+	</body>
+	</html>
+'; 
 ?>

@@ -1,5 +1,10 @@
 <?php	
+//Access: Registered Users
 include("variables_file.php");
+echo '
+	<!DOCTYPE html>
+	<html lang="en">
+';
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
@@ -11,10 +16,10 @@ include("views/navbar.php");
 			<button type="submit" id="new_borrow" class="btn btn-primary">Αίτηση Νέου Δανεισμού</button><br><br>
 		</div>
 	';
-	$userToBorrow = $_SESSION['aem'];
-	$borrowQuerySQL = "SELECT * FROM borrow_svds WHERE aem_borrow = :userToBorrow";
+	
+	$borrowQuerySQL = "SELECT * FROM borrow_svds WHERE id_user_borrow = :userToBorrow ORDER BY start_date ASC";
 	$borrowQuerySTMT = $db->prepare($borrowQuerySQL);
-	$borrowQuerySTMT-> bindParam(':userToBorrow', $userToBorrow, PDO::PARAM_INT); 
+	$borrowQuerySTMT-> bindParam(':userToBorrow', $id, PDO::PARAM_INT); 
 	$borrowQuerySTMT->execute();	
 	if ($borrowQuerySTMT->rowCount() == 0){ 
 		echo '<p class="alert alert-primary">Δεν έχετε κανέναν ενεργό δανεισμό αυτή τη στιγμή.</p>';
@@ -55,7 +60,7 @@ include("views/navbar.php");
 					'.$borrowState.'			    
 		 			<td>'.$equipName.'</td>
 					<td>'.date('d/m/Y',strtotime($borrowQuerySTMTResult['start_date'])).'</td>
-					<td>Εκρεμεί επιβεβαίωση</td>
+					<td>Εκκρεμεί επιβεβαίωση</td>
 					<td></td>
 					</tr>
 					</tbody>
@@ -82,4 +87,8 @@ include("views/navbar.php");
 	}
 
 include("views/footer.php");
+echo '
+	</body>
+	</html>
+';
 ?>	

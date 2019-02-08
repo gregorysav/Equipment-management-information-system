@@ -1,5 +1,10 @@
 <?php
+//Access: Registered Users
 include("variables_file.php");
+echo '
+	<!DOCTYPE html>
+	<html lang="en">
+';
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
@@ -13,13 +18,13 @@ include("views/navbar.php");
 	';
 	if (isset($_GET['equipmentName'])){
 		$equipmentName = filter_var($_GET['equipmentName'],FILTER_SANITIZE_STRING);
-		$searchQuerySQL = "SELECT * FROM equip_svds WHERE name_e LIKE :keyword";
+		$searchQuerySQL = "SELECT * FROM equip_svds WHERE name_e LIKE :keyword ORDER BY id_equip DESC";
 		$searchQuerySTMT = $db->prepare($searchQuerySQL);
 		$searchQuerySTMT->bindParam(':keyword', $equipmentName); 
 		$searchQuerySTMT->execute();
 		$searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC);
 		if (!$searchQuerySTMTResult['hash_filename']){
-		 		$imageHashedName = "noimage.jpg";	
+		 		$imageHashedName = "noimage.png";	
 		}else {
 		 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
 		}
@@ -42,7 +47,7 @@ include("views/navbar.php");
 				    <td>'.$searchQuerySTMTResult['name_e'].'</td>
 				    <td>'.$searchQuerySTMTResult['owner_name'].'</td>
 				    <td>'.$searchQuerySTMTResult['location_e'].'</td>
-				    <td><button type="submit" class="fa fa-shopping-cart add_to_basket" name_basket="'.$searchQuerySTMTResult['name_e'].'" id_user_basket='.$_SESSION['aem'].' id_equip_basket='.$searchQuerySTMTResult['id_equip'].'></button></td>
+				    <td><button type="submit" class="fa fa-shopping-cart add_to_basket" name_basket="'.$searchQuerySTMTResult['name_e'].'" id_user_basket='.$id.' id_equip_basket='.$searchQuerySTMTResult['id_equip'].'></button></td>
 				    </tr>
 			    </tbody>
 	        ';
@@ -56,7 +61,7 @@ include("views/navbar.php");
 	            $startPagination = ($pageOfPagination- 1) * $limitPagination;
 	        }
 
-			$equipQuerySQL = "SELECT * FROM equip_svds LIMIT :startPagination, :limitPagination";
+			$equipQuerySQL = "SELECT * FROM equip_svds ORDER BY id_equip DESC LIMIT :startPagination, :limitPagination";
 			$equipQuerySTMT = $db->prepare($equipQuerySQL);
 			$equipQuerySTMT->bindParam(':startPagination', $startPagination, PDO::PARAM_INT);
 			$equipQuerySTMT->bindParam(':limitPagination', $limitPagination, PDO::PARAM_INT); 
@@ -76,7 +81,7 @@ include("views/navbar.php");
 			';
 			while($equipQuerySTMTResult=$equipQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$equipQuerySTMTResult['hash_filename']){
-				 		$imageHashedName = "noimage.jpg";	
+				 		$imageHashedName = "noimage.png";	
 				}else {
 				 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
 				}
@@ -84,11 +89,11 @@ include("views/navbar.php");
 			 		echo '
 						<tbody>
 						<tr>
-						<td><img src="uploadedImages/'.$imageHashedName.'"/></td>
+						<td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'><img src="uploadedImages/'.$imageHashedName.'"/></a></td>
 						<td><a href=equipment_details.php?id_equip='.$equipQuerySTMTResult['id_equip'].'>'.$equipQuerySTMTResult['name_e'].'</a></td>
 						<td>'.$equipQuerySTMTResult['owner_name'].'</td>
 			    		<td>'.$equipQuerySTMTResult['location_e'].'</td>
-						<td><button type="submit" class="fa fa-shopping-cart add_to_basket" name_basket="'.$equipQuerySTMTResult['name_e'].'" id_user_basket='.$_SESSION['aem'].' id_equip_basket='.$equipQuerySTMTResult['id_equip'].'></button></td>	
+						<td><button type="submit" class="fa fa-shopping-cart add_to_basket" name_basket="'.$equipQuerySTMTResult['name_e'].'" id_user_basket='.$id.' id_equip_basket='.$equipQuerySTMTResult['id_equip'].'></button></td>	
 						</tr>
 						</tbody>       
 					';
@@ -138,4 +143,8 @@ include("views/navbar.php");
 	 	';
 		
 include("views/footer.php");
+echo '
+	</body>
+	</html>
+';
 ?>

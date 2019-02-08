@@ -1,5 +1,10 @@
 <?php
+//Access: Registered Users
 include("variables_file.php");
+echo '
+	<!DOCTYPE html>
+	<html lang="en">
+';
 include("views/connection.php");
 include("views/header.php");
   if ($_SESSION['email']){
@@ -9,38 +14,31 @@ include("views/header.php");
   		die("Δεν έχετε συνδεθεί");
   	}
 
-  	$dateSQL = "SELECT * FROM borrow_svds";
+  	$dateSQL = "SELECT * FROM borrow_svds WHERE id_user_borrow= :id";
     $dateSTMT = $db->prepare($dateSQL);
+    $dateSTMT->bindParam(':id', $id, PDO::PARAM_INT);
     $dateSTMT->execute();
-    while($dateSTMTResult=$dateSTMT->fetch(PDO::FETCH_ASSOC)){	
-	 	$nowDate =  strtotime(date("d-m-Y"));
-		$dateToCheck = strtotime(date('d-m-Y',strtotime($dateSTMTResult['expire_date'])));
-		$dateDiff = ($dateToCheck - $nowDate) / 86400;
-		if($dateDiff > 0) {
-    		$dateChangeSQL = "UPDATE borrow_svds SET  notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE id_borrow= :idBorrow";
+    if ($dateSTMT->rowCount() > 0) {
+	    while($dateSTMTResult=$dateSTMT->fetch(PDO::FETCH_ASSOC)){		
+		 	$nowDate =  strtotime(date("d-m-Y"));
+			$dateToCheck = strtotime(date('d-m-Y',strtotime($dateSTMTResult['expire_date'])));
+			$dateDiff = round(($dateToCheck - $nowDate) / 86400);
+    		$dateChangeSQL = "UPDATE borrow_svds SET notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE id_borrow= :idBorrow";
 			$dateChangeSTMT = $db->prepare($dateChangeSQL);
 			$dateChangeSTMT->bindParam(':idBorrow', $dateSTMTResult['id_borrow'], PDO::PARAM_INT);
 			$dateChangeSTMT->bindParam(':notify30', $dateDiff, PDO::PARAM_INT);
 			$dateChangeSTMT->bindParam(':notify20', $dateDiff, PDO::PARAM_INT);
 			$dateChangeSTMT->bindParam(':notify10', $dateDiff, PDO::PARAM_INT);
 			$dateChangeSTMT->execute();
-		}else {
-			$dateChangeSQL = "UPDATE borrow_svds SET  notify30= :notify30, notify20= :notify20, notify10= :notify10 WHERE id_borrow= :idBorrow";
-			$dateChangeSTMT = $db->prepare($dateChangeSQL);
-			$dateChangeSTMT->bindParam(':idBorrow', $dateSTMTResult['id_borrow'], PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify30', $dateDiff, PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify20', $dateDiff, PDO::PARAM_INT);
-			$dateChangeSTMT->bindParam(':notify10', $dateDiff, PDO::PARAM_INT);
-			$dateChangeSTMT->execute();
-		}
-    }
+		}	
+    } 
   		
     echo '
       <div class="container">
-      	<a href="index.php" id="indexPicture"><img src="images/uowmicon.jpg" id="uowmicon"></a><h2 id="welcome">Ηλεκτρονική Σελίδα Δανεισμού του ΠΔΜ</h2>
+      	<a href="index.php" id="indexPicture"><img src="images/uowmicon.jpg" id="uowmiconIndexPage"></a><h2 id="welcome">Ηλεκτρονική Σελίδα Δανεισμού του ΠΔΜ</h2>
       	<div class="form-inline">
       	  <p>Καλώς ήρθες, '.$last_name.' '.$first_name.'</p>	
-	      <p><a href="logout.php" class="btn btn-light" id="welcomeMessage">Αποσύνδεση</a></p><br>
+	      <p><a href="logout.php" class="btn btn-light" id="welcomeMessageIndexPage">Αποσύνδεση</a></p><br>
       	</div>
       	<hr>
     </div>  	
@@ -59,14 +57,14 @@ echo '
 	  			<img src="images/customericon.png" title="Προφίλ" alt="Card image cap">
 	  			</a>
 			</div>
-	        <div class="col-md-3 col-xs-3">
-	        	<p>Εξαρτήματα</p>
-	        	<a href="equipment.php">
-	  			<img src="images/componentsicon.png" title="Εξαρτήματα" alt="Card image cap">
-			</div>
 ';
 if ($_SESSION['type'] == 1){				
 	echo '
+		<div class="col-md-3 col-xs-3">
+	        <p>Εξαρτήματα</p>
+	        <a href="equipmentViewForTeacher.php">
+	  		<img src="images/componentsicon.png" title="Εξαρτήματα" alt="Card image cap">
+		</div>
 	    <div class="col-md-3 col-xs-3">
 	      	<p>Δανεισμοί</p>
 	       	<a href="confirmation.php">
@@ -75,6 +73,11 @@ if ($_SESSION['type'] == 1){
 	';
 }else {
 	echo '
+		<div class="col-md-3 col-xs-3">
+	       	<p>Εξαρτήματα</p>
+	       	<a href="equipmentViewForUser.php">
+	  		<img src="images/componentsicon.png" title="Εξαρτήματα" alt="Card image cap">
+		</div>
 	    <div class="col-md-3 col-xs-3">
 	      	<p>Δανεισμοί</p>
 	       	<a href="active.php">
@@ -93,4 +96,9 @@ echo '
 ';
 
 include("views/footer.php");
+
+echo '
+	</body>
+	</html>
+';
 ?>

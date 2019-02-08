@@ -1,5 +1,10 @@
 <?php
+//Access: Registered Users
 include("variables_file.php");
+echo '
+    <!DOCTYPE html>
+    <html lang="en">
+';
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
@@ -23,7 +28,7 @@ include("views/navbar.php");
         echo "Λυπούμαστε, το όνομα του αρχείο υπάρχει ήδη.";
         $uploadOk = 0;
     }
-    if ($_FILES["filename"]["size"] > 500000) {
+    if ($_FILES["filename"]["size"] > 1000000) {
         echo "Λυπούμαστε, το αρχείο έχει πολύ μεγάλο μέγεθος.";
         $uploadOk = 0;
     }
@@ -45,7 +50,7 @@ include("views/navbar.php");
             $updateEquipmentSTMT->bindParam(':real_filename', $realFilename, PDO::PARAM_INT);
             $updateEquipmentSTMT->bindParam(':hash_filename', $hashFilename, PDO::PARAM_INT);
             $updateEquipmentSTMT->execute();   
-            header("Refresh:0; url=equipment.php");               
+            header("Refresh:0; url=equipmentViewForTeacher.php");               
         } else {
             echo "Παρουσιάστηκε πρόβλημα κατά το ανέβασμα της εικόνας.";
         }
@@ -53,5 +58,8 @@ include("views/navbar.php");
 
         
 include("views/footer.php");            	
-
+echo '
+    </body>
+    </html>
+';
 ?>

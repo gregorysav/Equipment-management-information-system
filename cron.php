@@ -1,29 +1,34 @@
 <?php
-include("variables_file.php");
+//Access: Administrator
 include("views/connection.php");
-include("views/header.php");
-include("functions.php");
-
-	if ($type == 1){
-		echo '<div class="container">';	
-			$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip INNER JOIN users_svds on borrow_svds.aem_borrow = users_svds.id"; 
-			$baseQuerySTMT = $db->prepare($baseQuerySQL);
-			$baseQuerySTMT->execute();
-			if ($baseQuerySTMT->rowCount() == 0){
-				echo "Η λίστα δανεισμών είναι κενή.";
-			}else {
-				echo '<p>-Συνολικοί Ενεργοί Δανεισμοί :  '.$baseQuerySTMT->rowCount() .' </p>
-					  <p>-Τωρινή Ημερομηνία : '.date("d/m/Y").'</p>
-				';
-
-				while ($baseQuerySTMTResult=$baseQuerySTMT->fetch(PDO::FETCH_ASSOC)){
-					adminDisplayInformation($baseQuerySTMTResult['id_borrow'], $baseQuerySTMTResult['aem_borrow'], $baseQuerySTMTResult['email'], $baseQuerySTMTResult['expire_date']);
-				}
-			}		
-				
+include("function_cron.php");
+$one = 1;
+	date_default_timezone_set('Europe/Athens');
+	$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds ON borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE history_flag= :history_flag"; 
+	$baseQuerySTMT = $db->prepare($baseQuerySQL);
+	$baseQuerySTMT->bindParam(':history_flag', $one, PDO::PARAM_INT);
+	$baseQuerySTMT->execute();
+	if ($baseQuerySTMT->rowCount() == 0){
+	echo "Η λίστα δανεισμών είναι κενή.";
 	}else {
-		header("Location: index.php");
-		die("Δεν έχετε συνδεθεί");
+	echo '-Συνολικοί Ενεργοί Δανεισμοί :  '.$baseQuerySTMT->rowCount() .' <br>
+		  -Τωρινή Ημερομηνία : '.date("d/m/Y h:i:s").'<br>
+	';
+	while ($baseQuerySTMTResult=$baseQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+		$nameQuerySQL = "SELECT * FROM users_svds WHERE id= :borrowUser"; 
+		$nameQuerySTMT = $db->prepare($nameQuerySQL);
+		$nameQuerySTMT->bindParam(':borrowUser', $baseQuerySTMTResult['id_user_borrow']);
+		$nameQuerySTMT->execute();
+		while($nameQuerySTMTResult=$nameQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+			$last_name= $nameQuerySTMTResult['last_name'];
+			$first_name= $nameQuerySTMTResult['first_name'];
+			$aem = $nameQuerySTMTResult['aem'];
+			$telephone= $nameQuerySTMTResult['telephone'];
+			$email= $nameQuerySTMTResult['email'];
+		}	
+		$borrowerFullName = $last_name.' '.$first_name; 
+		adminDisplayInformation($baseQuerySTMTResult['id_borrow'], $aem, $borrowerFullName, $email, $baseQuerySTMTResult['expire_date'], $baseQuerySTMTResult['notify30'], $baseQuerySTMTResult['notify20'], $baseQuerySTMTResult['notify10']);
 	}
+}		
 	
 ?>

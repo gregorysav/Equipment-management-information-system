@@ -1,4 +1,5 @@
 <?php
+//Access: Registered Users
 if(!isset($_SESSION)) 
 { 
     session_start(); 
@@ -17,12 +18,17 @@ include("checkUser.php");
 	$first_name = $_SESSION['first_name'];
 	$email = $_SESSION['email'];
 	$telephone = $_SESSION['telephone'];
-	$type = $_SESSION['type'];
 	$isA = "Φοιτητής";
 	$fullName = $_SESSION['fullName']; 
 	if ($type == 1) {
 		$isA = "Διδάσκοντας";
+	}elseif ($type == 2) {
+		$isA = "Μέλος ΔΕΠ";
+	}elseif ($type == 3) {
+		$isA = "Μέλος Ε.Ε.ΔΙ.Π.";
 	}
+	date_default_timezone_set('Europe/Athens');
+    setlocale(LC_TIME, 'el_GR.UTF-8');
 	$today = date('d-m-Y');
 	$newTodayFormat = date("Y-m-d", strtotime($today));
     $startToday = date_create($today);
@@ -45,5 +51,6 @@ include("checkUser.php");
 	$departmentsNameArray = array();
 	$providersNameArray = array();
 	$basketItems = 0;
+	$nothing = NULL;
 
 ?>    

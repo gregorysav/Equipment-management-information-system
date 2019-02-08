@@ -1,5 +1,10 @@
 <?php
+//Access: Registered Users
 include("variables_file.php");
+echo '
+	<!DOCTYPE html>
+	<html lang="en">
+';
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
@@ -13,7 +18,7 @@ include("views/navbar.php");
 	while($imageToDisplaySTMTResult=$imageToDisplaySTMT->fetch(PDO::FETCH_ASSOC)){
 	 	$imageRealName = $imageToDisplaySTMTResult['real_filename'];
 	 	if (!$imageToDisplaySTMTResult['hash_filename']){
-	 		$imageHashedName = "noimage.jpg";	
+	 		$imageHashedName = "noimage.png";	
 	 	}else {
 	 		$imageHashedName = $imageToDisplaySTMTResult['hash_filename'];
 	 	} 	
@@ -32,4 +37,8 @@ include("views/navbar.php");
 	';
 
 include("views/footer.php");
+echo '
+	</body>
+	</html>
+';
 ?>
