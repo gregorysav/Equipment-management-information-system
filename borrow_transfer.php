@@ -1,6 +1,7 @@
 <?php
 //Access: Administrator
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -9,7 +10,7 @@ include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
 include("function_cron.php");
-
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
 if ($type == 1 OR $type == 2 OR $type == 3){
 	$idToChange = filter_var($_GET['id_borrow'],FILTER_SANITIZE_NUMBER_FLOAT);
 
@@ -154,8 +155,8 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 			</html>
 		';
 }else {
-	header("Location: index.php");
-	die("Δεν έχετε συνδεθεί");
+    header("Location: index.php");
+    die("Δεν δικαιώματα εισόδου σε αυτή τη σελίδα.");
 }
 
 

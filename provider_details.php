@@ -1,6 +1,7 @@
 <?php
 //Access: Administrator
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,6 +9,7 @@ echo '
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
 	if ($type == 1 OR $type == 2 OR $type == 3 ) {
 		if (isset($_GET['id_p'])){
 		 	$idProviderToShow= filter_var($_GET['id_p'],FILTER_SANITIZE_NUMBER_FLOAT);
@@ -38,7 +40,7 @@ include("views/navbar.php");
 			 	if ($equipmentQuerySTMT-> rowCount() > 0){
 			 		echo'			
 							<div class="col-md-8 border rounded">
-								<h3 id="title">Από τον '.$providerQuerySTMTResult['name_p'].' έχουμε πάρει επιπλέον: </h3>
+								<h3 class="title">Από τον '.$providerQuerySTMTResult['name_p'].' έχουμε πάρει επιπλέον: </h3>
 								<ul>
 					';
 					while($equipmentQuerySTMTResult=$equipmentQuerySTMT->fetch(PDO::FETCH_ASSOC)){

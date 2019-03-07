@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -26,7 +27,8 @@ include("functions.php");
 	 			$borrow_reason = "Δεν δόθηκε λόγος δανεισμού";
 	 		}
 	 		
-			$equipmentName = "Τα επιλεγμένα εξαρτήματα";
+			$equipmentNameEmail = trim($_SESSION['equipmentToBorrow'], ',');
+			$equipmentNameSMS = "Επιλεγμένα εξαρτήματα";
 			$userToSendEmailAndSMSQuerySQL = "SELECT * FROM users_svds WHERE aem= :aemBorrower";
             $userToSendEmailAndSMSQuerySTMT = $db->prepare($userToSendEmailAndSMSQuerySQL);
             $userToSendEmailAndSMSQuerySTMT->bindParam(':aemBorrower', $aem_borrow, PDO::PARAM_INT);
@@ -36,8 +38,8 @@ include("functions.php");
 						$email = $userToSendEmailAndSMSQuerySTMTResult['email'];
 						$full_name = $userToSendEmailAndSMSQuerySTMTResult['last_name'].' '.$userToSendEmailAndSMSQuerySTMTResult['first_name'];
 						$telephone = $userToSendEmailAndSMSQuerySTMTResult['telephone'];
-						sendSMS($full_name, $telephone, $aem_borrow, $dateDiff, $equipmentName);
-						sendEmail($email, $full_name, $aem_borrow, $dateDiff, $equipmentName);
+						sendSMS($full_name, $telephone, $aem_borrow, $dateDiff, $equipmentNameSMS);
+						sendEmail($email, $full_name, $aem_borrow, $dateDiff, $equipmentNameEmail);
 				}
 			}
 
@@ -47,15 +49,15 @@ include("functions.php");
 	 		$finishBorrowSQL = "UPDATE borrow_svds  SET id_user_borrow= :id_user_borrow, start_date= :start_date, expire_date= :expire_date, history_flag= :history_flag, isborrowed= :isborrowed, notify30= :notify30, notify20= :notify20, notify10= :notify10, confirmation_borrow= :confirmation_borrow, borrow_reason= :borrow_reason WHERE isborrowed= :zero";
 	 		$finishBorrowSTMT = $db->prepare($finishBorrowSQL);
 	 		$finishBorrowSTMT->bindParam(':zero', $zero, PDO::PARAM_INT);
-	 		$finishBorrowSTMT->bindParam(':id_user_borrow', $idToCompleteBorrow);
+	 		$finishBorrowSTMT->bindParam(':id_user_borrow', $idToCompleteBorrow, PDO::PARAM_INT);
 	 		$finishBorrowSTMT->bindParam(':start_date', $start_date);
 			$finishBorrowSTMT->bindParam(':expire_date', $expire_date);
-			$finishBorrowSTMT->bindParam(':history_flag', $one);
-	 		$finishBorrowSTMT->bindParam(':isborrowed', $one);
-	 		$finishBorrowSTMT->bindParam(':notify30', $daysToEnd);
-	 		$finishBorrowSTMT->bindParam(':notify20', $daysToEnd);
-	 		$finishBorrowSTMT->bindParam(':notify10', $daysToEnd); 
-	 		$finishBorrowSTMT->bindParam(':confirmation_borrow', $one); 
+			$finishBorrowSTMT->bindParam(':history_flag', $one, PDO::PARAM_INT);
+	 		$finishBorrowSTMT->bindParam(':isborrowed', $one, PDO::PARAM_INT);
+	 		$finishBorrowSTMT->bindParam(':notify30', $daysToEnd, PDO::PARAM_INT);
+	 		$finishBorrowSTMT->bindParam(':notify20', $daysToEnd, PDO::PARAM_INT);
+	 		$finishBorrowSTMT->bindParam(':notify10', $daysToEnd, PDO::PARAM_INT); 
+	 		$finishBorrowSTMT->bindParam(':confirmation_borrow', $one, PDO::PARAM_INT); 
 	 		$finishBorrowSTMT->bindParam(':borrow_reason', $borrow_reason);
 		    if ($finishBorrowSTMT->execute()) {				
 		    	echo '<p class="alert alert-success">Ο δανεισμός καταχωρήθηκε με επιτυχία</p>';
@@ -146,8 +148,7 @@ include("functions.php");
 
 echo '
 	<div class="container"> 	
-		<h3>Γεια σου '.$last_name .' '.
-	 		$first_name.', έχεις επιλέξει τα παρακάτω εξαρτήματα:  </h3>
+		<h3>Έχεις επιλέξει τα παρακάτω εξαρτήματα:  </h3>
 		<div class="row">
 			<div class="col-md-6">
 			<form method="post">			
@@ -175,7 +176,7 @@ echo '
 				}else{
 	 				while($basketQuerySTMTResult=$basketQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 	 					echo '
-	 						<p id="id_equip_borrow" title="Αφαίρεση" value="'.$basketQuerySTMTResult['name_basket'].'"><a id="finishRemove" href="functions.php?function=removeFromFinish&id_basket='.$basketQuerySTMTResult['id_basket'].'&id_user_basket='.$_SESSION['id'].'&id_equip_basket='.$basketQuerySTMTResult['id_equip_basket'].'"><span class="fa fa-times"></span></a> '.$basketQuerySTMTResult['name_basket'].'</p>	
+	 						<p id="id_equip_borrow" title="Αφαίρεση" value="'.$basketQuerySTMTResult['name_basket'].'"><a id="finishRemove" href="actions.php?action=removeFromFinish&id_basket='.$basketQuerySTMTResult['id_basket'].'&id_user_basket='.$_SESSION['id'].'&id_equip_basket='.$basketQuerySTMTResult['id_equip_basket'].'"><span class="fa fa-times"></span></a> '.$basketQuerySTMTResult['name_basket'].'</p>	
 
 	 					';			 	 
 	 				}

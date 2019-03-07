@@ -1,6 +1,7 @@
 <?php
 //Access: Administrator
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,13 +9,13 @@ echo '
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
 	if ($type == 1 OR $type == 2 OR $type == 3) {
 		if (isset($_SESSION['unableToDeleteDepartment'])){
 			echo $_SESSION['unableToDeleteDepartment'];
 			$_SESSION['unableToDeleteDepartment'] ="";
 		}
-
+//  Η μεταβλητή $_GET['p'] και ελέγχει τη σελίδα που βρισκόμαστε βάση του pagination
 		if (isset($_GET['p'])){
         	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
             $startPagination = ($pageOfPagination- 1) * $limitPagination;
@@ -41,7 +42,7 @@ include("views/navbar.php");
 							</thead>
 				 	
 					';
-
+//  Η μεταβλητή $url έχει τεθεί από το $_SERVER['REQUEST_URI'] και ελέγχει το ακριβές url που έχει η σελίδα που βρισκόμαστε	
 	 	$url = $_SERVER['REQUEST_URI'];
 		$value=(explode("=", $url));
 		if (isset($value[1]) AND $value[1] == ""){
@@ -51,7 +52,7 @@ include("views/navbar.php");
 						<tr>
 						    <td>'.$departmentQuerySTMTResult['name_dep'].'</td>
 						    <td>'.$departmentQuerySTMTResult['telephone_dep'].'</td>
-						    <td id="departmentPageButtons"><a href=functions_department.php?function=delete&id_dep='.$departmentQuerySTMTResult['id_dep'].' id="delete" name="delete" class="btn btn-dark">Διαγραφή</a><br><a href=functions_department.php?function=update&?id_dep='.$departmentQuerySTMTResult['id_dep'].' id="modify" name="modify" class="btn btn-dark">Αλλαγή</a></button></td>
+						    <td id="departmentPageButtons"><a href=actions_department.php?action=delete&id_dep='.$departmentQuerySTMTResult['id_dep'].' id="delete" name="delete" class="btn btn-dark">Διαγραφή</a><br><a href=actions_department.php?action=update&?id_dep='.$departmentQuerySTMTResult['id_dep'].' id="modify" name="modify" class="btn btn-dark">Αλλαγή</a></button></td>
 				    	</tr>
 				    	</tbody>
 			    	';
@@ -65,7 +66,7 @@ include("views/navbar.php");
 				<tr>
 				    <td>'.$departmentQuerySTMTResult['name_dep'].'</td>
 				    <td>'.$departmentQuerySTMTResult['telephone_dep'].'</td>
-				    <td id="departmentPageButtons"><a href=functions_department.php?function=delete&id_dep='.$departmentQuerySTMTResult['id_dep'].' id="delete" name="delete" class="btn btn-dark">Διαγραφή</a><br><a href=functions_department.php?function=update&id_dep='.$departmentQuerySTMTResult['id_dep'].' id="modify" name="modify" class="btn btn-dark">Αλλαγή</a></button></td>
+				    <td id="departmentPageButtons"><a href=actions_department.php?action=delete&id_dep='.$departmentQuerySTMTResult['id_dep'].' id="delete" name="delete" class="btn btn-dark">Διαγραφή</a><br><a href=actions_department.php?action=update&id_dep='.$departmentQuerySTMTResult['id_dep'].' id="modify" name="modify" class="btn btn-dark">Αλλαγή</a></button></td>
 		    	</tr>
 		    	</tbody>
 	    	';
@@ -109,8 +110,8 @@ include("views/navbar.php");
             </div>
         ';
 	}else{
-		header("Refresh:0; url=provider.php"); 
-        die("Δεν έχετε δικαιώματα πρόσβασης σε αυτή τη σελίδα.");
+		header("Refresh:0; url=index.php"); 
+        die("Δεν έχετε δικαιώματα εισόδου σε αυτή τη σελίδα.");
 	} 	
 
 

@@ -1,6 +1,7 @@
 <?php
 //Access: Administrator
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,7 +9,8 @@ echo '
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-
+include("function_cron.php");
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
 if ($type == 1 OR $type == 2 OR $type == 3){
 
 	echo '
@@ -27,6 +29,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 		</div><br>	
 	';
 	$limitPagination = 10;
+//  Η μεταβλητή $_GET['p'] και ελέγχει τη σελίδα που βρισκόμαστε βάση του pagination	
 	if (isset($_GET['p'])){
     	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
         $startPagination = ($pageOfPagination- 1) * $limitPagination;
@@ -44,18 +47,19 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 		echo "<br>";
 		$tableTop = '
 			<div class="container returnEquipmentTable">
+			<div class="table-responsive">
 			<table class="table table-bordered">	
 			<thead class="thead-dark">
 			<tr>
 	    		<th>Ονοματεπώνυμο</th>
 	    		<th>ΑΕΜ</th>
 	    		<th>Εξάρτημα</th>
-	    		<th>Έναρξη</th>
-	    		<th>Λήξη</th>
+	    		<th>Έναρξη-Λήξη</th>
 	    		<th>Προθεσμία</th>
 	    		<th>Επιβεβαίωση</th>
 	    		<th>Αιτιολόγηση</th>
-	    		<th>Τερματισμός</th>
+	    		<th>Υπενθύμιση</th>
+	    		<th>Ενέργειες</th>
 	  		</tr>
 	  		</thead>
 		';
@@ -92,7 +96,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 			';
 		}
 	}
-
+//  Η μεταβλητή $url έχει τεθεί από το $_SERVER['REQUEST_URI'] και ελέγχει το ακριβές url που έχει η σελίδα που βρισκόμαστε	
 	$url = $_SERVER['REQUEST_URI'];
 		$value=(explode("=", $url));
 		if (isset($value[1]) AND $value[1] == ""){
@@ -108,7 +112,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 				}
 				$nowDate =  strtotime(date("d-m-Y"));
 				$dateToCheck = strtotime(date('d-m-Y',strtotime($baseQuerySTMTResult['expire_date'])));
-				$dateDiff = (round(($dateToCheck - $nowDate) / 86400) + 1);
+				$dateDiff = round(($dateToCheck - $nowDate) / 86400);
 
 				$nameQuerySQL = "SELECT * FROM users_svds WHERE id= :borrowUser"; 
 	      		$nameQuerySTMT = $db->prepare($nameQuerySQL);
@@ -120,15 +124,15 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 	      			$aem = $nameQuerySTMTResult['aem'];
 	      			$telephone= $nameQuerySTMTResult['telephone'];
 	      			$email= $nameQuerySTMTResult['email'];
+	      			$full_name= $last_name.' '.$first_name;
 	      		}
 	      		$popoverMessage = "User : $last_name $first_name <br> AEM: $aem <br> Phone number: $telephone <br> Email: $email";
 				echo '
 					'.$borrowState.'
-			    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'">'.$last_name.' '.$first_name.'</td>
-			    	<td>'.$aem.'</td>
+			    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'"><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem.'</a></td>
 			    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
-			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).' εώς '.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
 			    	<td>'.$dateDiff.' ημέρες</td>
 			    ';
 			    if ($baseQuerySTMTResult['confirmation_borrow'] == 1){
@@ -150,6 +154,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 			  	 	';
 			  	}
 			  	echo '
+			  		<td><form method="POST"><input type="hidden" name="full_name" value="'.$full_name.'"><input type="hidden" name="telephone" value="'.$telephone.'"><input type="hidden" name="aem_borrow" value="'.$aem.'"><input type="hidden" name="dateDiff" value='.$dateDiff.'><input type="hidden" name="equipmentName" value="'.$baseQuerySTMTResult['name_e'].'"><input type="hidden" name="email" value="'.$email.'"><button class="btn btn-dark" name="reminder">Αποστολή</button></form></td>
 			  	 	<td id="buttonToReturnEquipment"><a href=borrow_delete.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].'&id_equip='.$baseQuerySTMTResult['id_equip'].'&id_user_borrow='.$$baseQuerySTMTResult['id_user_borrow'].' class="btn btn-dark returnEquipment" id_equip='.$baseQuerySTMTResult['id_equip'].'>Επιστροφή</a><a href=borrow_change.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Επεξεργασία</a><a href=borrow_transfer.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Μεταφορά</a></td>
 			  		</tr>
 			  		</body>
@@ -185,7 +190,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 							}
 							$nowDate =  strtotime(date("d-m-Y"));
 							$dateToCheck = strtotime(date('d-m-Y',strtotime($baseQuerySTMTResult['expire_date'])));
-							$dateDiff = (round(($dateToCheck - $nowDate) / 86400) + 1);
+							$dateDiff = round(($dateToCheck - $nowDate) / 86400);
 
 							$nameQuerySQL = "SELECT * FROM users_svds WHERE id= :borrowUser"; 
 				      		$nameQuerySTMT = $db->prepare($nameQuerySQL);
@@ -197,15 +202,15 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 				      			$aem = $nameQuerySTMTResult['aem'];
 				      			$telephone= $nameQuerySTMTResult['telephone'];
 				      			$email= $nameQuerySTMTResult['email'];
+				      			$full_name= $last_name.' '.$first_name;
 				      		}
 				      		$popoverMessage = "User : $last_name $first_name <br> AEM: $aem <br> Phone number: $telephone <br> Email: $email";
 							echo '
 								'.$borrowState.'
-								<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'">'.$last_name.' '.$first_name.'</td>
-						    	<td>'.$aem.'</td>
+								<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'"><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    				<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem.'</a></td>
 						    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
-						    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-						    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+						    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).' εώς '.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
 						    	<td>'.$dateDiff.' ημέρες</td>
 						    ';
 						    if ($baseQuerySTMTResult['confirmation_borrow'] == 1){
@@ -227,6 +232,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 						  	 	';
 						  	}
 						  	echo '
+						  		<td><form method="POST"><input type="hidden" name="full_name" value="'.$full_name.'"><input type="hidden" name="telephone" value="'.$telephone.'"><input type="hidden" name="aem_borrow" value="'.$aem.'"><input type="hidden" name="dateDiff" value='.$dateDiff.'><input type="hidden" name="equipmentName" value="'.$baseQuerySTMTResult['name_e'].'"><input type="hidden" name="email" value="'.$email.'"><button class="btn btn-dark" name="reminder">Αποστολή</button></form></td>
 						  	 	<td id="buttonToReturnEquipment"><a href=borrow_delete.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].'&id_equip='.$baseQuerySTMTResult['id_equip'].'&id_user_borrow='.$baseQuerySTMTResult['id_user_borrow'].' class="btn btn-dark returnEquipment" id_equip='.$baseQuerySTMTResult['id_equip'].'>Επιστροφή</a><a href=borrow_change.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark">Επεξεργασία</a><a href=borrow_transfer.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Μεταφορά</a></td>
 						  		</tr>
 							';
@@ -253,6 +259,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
   			$aem = $userQuerySTMTResult['aem'];
   			$telephone= $userQuerySTMTResult['telephone'];
   			$email= $userQuerySTMTResult['email'];
+  			$full_name= $last_name.' '.$first_name;
 		}	
 
 		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE id_user_borrow= :idToFindUser ORDER BY notify10 ASC"; 
@@ -272,16 +279,15 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 					}
 					$nowDate =  strtotime(date("d-m-Y"));
 					$dateToCheck = strtotime(date('d-m-Y',strtotime($baseQuerySTMTResult['expire_date'])));
-					$dateDiff = (round(($dateToCheck - $nowDate) / 86400) + 1);
+					$dateDiff = round(($dateToCheck - $nowDate) / 86400);
 
 		      		$popoverMessage = "User : $last_name $first_name <br> AEM: $aem <br> Phone number: $telephone <br> Email: $email";
 					echo '
 						'.$borrowState.'
-				    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'">'.$last_name.' '.$first_name.'</td>
-				    	<td>'.$aem.'</td>
+				    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'"><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    		<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem.'</a></td>
 				    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).' εώς '.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
 				    	<td>'.$dateDiff.' ημέρες</td>
 				    ';
 				    if ($baseQuerySTMTResult['confirmation_borrow'] == 1){
@@ -303,6 +309,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 				  	 	';
 				  	}
 				  	echo '
+				  		<td><form method="POST"><input type="hidden" name="full_name" value="'.$full_name.'"><input type="hidden" name="telephone" value="'.$telephone.'"><input type="hidden" name="aem_borrow" value="'.$aem.'"><input type="hidden" name="dateDiff" value='.$dateDiff.'><input type="hidden" name="equipmentName" value="'.$baseQuerySTMTResult['name_e'].'"><input type="hidden" name="email" value="'.$email.'"><button class="btn btn-dark" name="reminder">Αποστολή</button></form></td>
 				  	 	<td id="buttonToReturnEquipment"><a href=borrow_delete.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].'&id_equip='.$baseQuerySTMTResult['id_equip'].'&id_user_borrow='.$idToFindUser.' class="btn btn-dark returnEquipment" id_equip='.$baseQuerySTMTResult['id_equip'].'>Επιστροφή</a><a href=borrow_change.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark">Επεξεργασία</a><a href=borrow_transfer.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Μεταφορά</a></td>
 				  		</tr>
 					';	
@@ -343,7 +350,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 						}
 						$nowDate =  strtotime(date("d-m-Y"));
 						$dateToCheck = strtotime(date('d-m-Y',strtotime($baseQuerySTMTResult['expire_date'])));
-						$dateDiff = (round(($dateToCheck - $nowDate) / 86400) + 1);
+						$dateDiff = round(($dateToCheck - $nowDate) / 86400);
 						$nameQuerySQL = "SELECT * FROM users_svds WHERE id= :borrowUser"; 
 			      		$nameQuerySTMT = $db->prepare($nameQuerySQL);
 			      		$nameQuerySTMT->bindParam(':borrowUser', $baseQuerySTMTResult['id_user_borrow']);
@@ -354,15 +361,15 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 			      			$aem = $nameQuerySTMTResult['aem'];
 			      			$telephone= $nameQuerySTMTResult['telephone'];
 			      			$email= $nameQuerySTMTResult['email'];
+			      			$full_name= $last_name.' '.$first_name;
 			      		}
 			      		$popoverMessage = "User : $last_name $first_name <br> AEM: $aem <br> Phone number: $telephone <br> Email: $email";
 						echo '
 							'.$borrowState.'
-				    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'">'.$last_name.' '.$first_name.'</td>
-				    	<td>'.$aem.'</td>
+				    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'"><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    		<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem.'</a></td>
 				    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).' εώς '.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
 				    	<td>'.$dateDiff.' ημέρες</td>
 					    ';
 					    if ($baseQuerySTMTResult['confirmation_borrow'] == 1){
@@ -384,6 +391,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 					  	 	';
 					  	}
 					  	echo '
+					  		<td><form method="POST"><input type="hidden" name="full_name" value="'.$full_name.'"><input type="hidden" name="telephone" value="'.$telephone.'"><input type="hidden" name="aem_borrow" value="'.$aem.'"><input type="hidden" name="dateDiff" value='.$dateDiff.'><input type="hidden" name="equipmentName" value="'.$baseQuerySTMTResult['name_e'].'"><input type="hidden" name="email" value="'.$email.'"><button class="btn btn-dark" name="reminder">Αποστολή</button></form></td>
 					  	 	<td id="buttonToReturnEquipment"><a href=borrow_delete.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].'&id_equip='.$baseQuerySTMTResult['id_equip'].'&id_user_borrow='.$baseQuerySTMTResult['id_user_borrow'].' class="btn btn-dark returnEquipment" id_equip='.$baseQuerySTMTResult['id_equip'].'>Επιστροφή</a><a href=borrow_change.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark">Επεξεργασία</a><a href=borrow_transfer.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Μεταφορά</a></td>
 					  		</tr>
 						';
@@ -413,7 +421,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 						}
 						$nowDate =  strtotime(date("d-m-Y"));
 						$dateToCheck = strtotime(date('d-m-Y',strtotime($baseQuerySTMTResult['expire_date'])));
-						$dateDiff = (round(($dateToCheck - $nowDate) / 86400) + 1);
+						$dateDiff = round(($dateToCheck - $nowDate) / 86400);
 						$nameQuerySQL = "SELECT * FROM users_svds WHERE id= :borrowUser"; 
 			      		$nameQuerySTMT = $db->prepare($nameQuerySQL);
 			      		$nameQuerySTMT->bindParam(':borrowUser', $baseQuerySTMTResult['id_user_borrow']);
@@ -424,15 +432,15 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 			      			$aem = $nameQuerySTMTResult['aem'];
 			      			$telephone= $nameQuerySTMTResult['telephone'];
 			      			$email= $nameQuerySTMTResult['email'];
+			      			$full_name= $last_name.' '.$first_name;
 			      		}
 			      		$popoverMessage = "User : $last_name $first_name <br> AEM: $aem <br> Phone number: $telephone <br> Email: $email";
 						echo '
 							'.$borrowState.'
-              			<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'">'.$last_name.' '.$first_name.'</td>
-              			<td>'.$aem.'</td>
+              			<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'"><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    		<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem.'</a></td>
 				    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
-              			<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-              			<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+              			<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).' εώς '.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
               			<td>'.$dateDiff.' ημέρες</td>
             			';
 	                	if ($baseQuerySTMTResult['confirmation_borrow'] == 1){
@@ -454,7 +462,8 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 					  	 	';
 					  	}
 			                echo '
-			                  <td id="buttonToReturnEquipment"><a href=borrow_delete.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].'&id_equip='.$baseQuerySTMTResult['id_equip'].'&id_user_borrow='.$baseQuerySTMTResult['id_user_borrow'].' class="btn btn-dark returnEquipment" id_equip='.$baseQuerySTMTResult['id_equip'].'>Επιστροφή</a><a href=borrow_change.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark">Επεξεργασία</a><a href=borrow_transfer.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Μεταφορά</a></td>
+			                	<td><form method="POST"><input type="hidden" name="full_name" value="'.$full_name.'"><input type="hidden" name="telephone" value="'.$telephone.'"><input type="hidden" name="aem_borrow" value="'.$aem.'"><input type="hidden" name="dateDiff" value='.$dateDiff.'><input type="hidden" name="equipmentName" value="'.$baseQuerySTMTResult['name_e'].'"><input type="hidden" name="email" value="'.$email.'"><button class="btn btn-dark" name="reminder">Αποστολή</button></form></td>
+				                <td id="buttonToReturnEquipment"><a href=borrow_delete.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].'&id_equip='.$baseQuerySTMTResult['id_equip'].'&id_user_borrow='.$baseQuerySTMTResult['id_user_borrow'].' class="btn btn-dark returnEquipment" id_equip='.$baseQuerySTMTResult['id_equip'].'>Επιστροφή</a><a href=borrow_change.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark">Επεξεργασία</a><a href=borrow_transfer.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Μεταφορά</a></td>
 			                  </tr>
 			              ';
 			        }      
@@ -475,7 +484,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 				}
 				$nowDate =  strtotime(date("d-m-Y"));
 				$dateToCheck = strtotime(date('d-m-Y',strtotime($baseQuerySTMTResult['expire_date'])));
-				$dateDiff = (round(($dateToCheck - $nowDate) / 86400) + 1);
+				$dateDiff = round(($dateToCheck - $nowDate) / 86400);
 				
 				$nameQuerySQL = "SELECT * FROM users_svds WHERE id= :borrowUser"; 
 	      		$nameQuerySTMT = $db->prepare($nameQuerySQL);
@@ -487,15 +496,15 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 	      			$aem = $nameQuerySTMTResult['aem'];
 	      			$telephone= $nameQuerySTMTResult['telephone'];
 	      			$email= $nameQuerySTMTResult['email'];
+	      			$full_name= $last_name.' '.$first_name;
 	      		}	
 	      		$popoverMessage = "User : $last_name $first_name <br> AEM: $aem <br> Phone number: $telephone <br> Email: $email";
 				echo '
 					'.$borrowState.'
-			    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'">'.$last_name.' '.$first_name.'</td>
-			    	<td>'.$aem.'</td>
-			    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
-			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+			    	<td class="showBorrowerInfo" data-toggle="popover" title="Πληροφορίες" data-html="true" data-placement="top" data-content="'.$popoverMessage.'"><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem.'</a></td>
+			    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'].'</a></td>
+			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).' εώς'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
 			    	<td>'.$dateDiff.' ημέρες</td>
 			    ';
 			    if ($baseQuerySTMTResult['confirmation_borrow'] == 1){
@@ -517,6 +526,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 			  	 	';
 			  	}
 			  	echo '
+			  		<td><form method="POST"><input type="hidden" name="full_name" value="'.$full_name.'"><input type="hidden" name="telephone" value="'.$telephone.'"><input type="hidden" name="aem_borrow" value="'.$aem.'"><input type="hidden" name="dateDiff" value='.$dateDiff.'><input type="hidden" name="equipmentName" value="'.$baseQuerySTMTResult['name_e'].'"><input type="hidden" name="email" value="'.$email.'"><button class="btn btn-dark" name="reminder">Αποστολή</button></form></td>
 			  	 	<td id="buttonToReturnEquipment"><a href=borrow_delete.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].'&id_equip='.$baseQuerySTMTResult['id_equip'].'&id_user_borrow='.$baseQuerySTMTResult['id_user_borrow'].' class="btn btn-dark returnEquipment" id_equip='.$baseQuerySTMTResult['id_equip'].'>Επιστροφή</a><a href=borrow_change.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Επεξεργασία</a><a href=borrow_transfer.php?id_borrow='.$baseQuerySTMTResult['id_borrow'].' class="btn btn-dark" >Μεταφορά</a></td>
 			  		</tr>
 			  		</body>
@@ -560,17 +570,22 @@ if ($type == 1 OR $type == 2 OR $type == 3){
         ';
     }
 
-		echo '
-			</ul>
-			</table>
-		';
-		include("views/footer.php");
-		echo '
-			</body>
-			</html>
-			</div>
-		';
+	echo '
+		</ul>
+		</table>
+		</div>
+	';
+	include("views/footer.php");
+	echo '
+		</body>
+		</html>
+		</div>
+	';
 }			
+if (isset($_POST['reminder'])){
+	reminder($_POST['full_name'], $_POST['telephone'], $_POST['aem_borrow'], $_POST['dateDiff'], $_POST['equipmentName']);	
+	sendEmail($_POST['email'], $_POST['full_name'], $_POST['aem_borrow'], $_POST['dateDiff'], $_POST['equipmentName']);
+}
 }else {
 	header("Location: index.php");
 	die("Δεν έχετε συνδεθεί");

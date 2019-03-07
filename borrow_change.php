@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -10,6 +11,7 @@ include("views/header.php");
 include("views/navbar.php");
 
 	$idToChange = filter_var($_GET['id_borrow'],FILTER_SANITIZE_NUMBER_FLOAT);
+//  Η μεταβλητή $userToBorrow έχει τεθεί από το $_SESSION['id'] και περιέχει το id του συνδεδεμένου χρήστη	
 	$userToBorrow = $_SESSION['id'];
 
 	$borrowQuerySQL = "SELECT * FROM borrow_svds WHERE id_borrow= :idToChange AND (id_user_borrow= :idLoggedUser OR $type!= :type)";
@@ -54,7 +56,7 @@ include("views/navbar.php");
 		 		$finishBorrowSTMT->bindParam(':idToChange', $idToChange, PDO::PARAM_INT);
 		 		$finishBorrowSTMT->bindParam(':start_date', $start_date);
 			    $finishBorrowSTMT->bindParam(':expire_date', $expire_date);
-			    $finishBorrowSTMT->bindParam(':isborrowed', $zero);
+			    $finishBorrowSTMT->bindParam(':isborrowed', $one);
 			    $finishBorrowSTMT->bindParam(':notify30', $daysToEnd);
 			    $finishBorrowSTMT->bindParam(':notify20', $daysToEnd);
 			    $finishBorrowSTMT->bindParam(':notify10', $daysToEnd);
@@ -97,7 +99,7 @@ include("views/navbar.php");
 
 		echo '		
 		<div class="container"> 	
-			<h3>Γεια σου <?php echo $userToBorrowName; ?>, έχεις επιλέξει το παρακάτω εξαρτήματα:  </h3>
+			<h3>Έχεις επιλέξει το παρακάτω εξαρτήματα:  </h3>
 			<div class="row">
 			  	<div class="col-md-6">
 					<form method="post">

@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -9,7 +10,7 @@ include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
 include("function_cron.php");
-
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
 if (isset($_GET['id_borrow']) AND $type == 0){	
 	$idToDelete= filter_var($_GET['id_borrow'],FILTER_SANITIZE_NUMBER_FLOAT);
 	$deleteQuerySQL = "DELETE  FROM borrow_svds WHERE id_borrow=  :idToDelete";
@@ -27,7 +28,7 @@ if (isset($_GET['id_borrow']) AND $type == 0){
 
 	
 }
-
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
 if (isset($_GET['id_borrow']) AND ($type == 1 OR $type == 2 OR $type == 3)){	
 	$idToDelete= filter_var($_GET['id_borrow'],FILTER_SANITIZE_NUMBER_FLOAT);
 	$idToSendMessage= filter_var($_GET['id_user_borrow'],FILTER_SANITIZE_NUMBER_FLOAT);

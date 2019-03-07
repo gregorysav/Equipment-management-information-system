@@ -181,7 +181,7 @@ function sendEmail($email, $full_name, $aem_borrow, $dateDiff, $equipmentName) {
     $crlf = chr(13) . chr(10);
     $to = $email;
     $subject = "[ILoan] Notification Email";
-    $message = 'Αυτοματοποιημένο μήνυμα i-loan"'.$crlf.''.$crlf.''.$crlf.'"Προς: [ '.$full_name.' ], AEM ['.$aem_borrow.'] "'.$crlf.'"Ο δανεισμός για ['.$equipmentName.'] που έχεις κάνει λήγει σε '.$dateDiff.' ημέρες. Μην απαντήσετε σε αυτό το email, γιατί δεν παρακολουθείται η συγκεκριμένη διεύθυνση."'.$crlf.''.$crlf.'"Παρακαλώ διατηρήστε αυτό το email στο αρχείο σας έως το τέλος του εξαμήνου".';
+    $message = 'Αυτοματοποιημένο μήνυμα i-loan"'.$crlf.''.$crlf.''.$crlf.'Προς: [ '.$full_name.' ], AEM ['.$aem_borrow.'] '.$crlf.'Ο δανεισμός για ['.$equipmentName.'] που έχεις κάνει λήγει σε '.$dateDiff.' ημέρες. Μην απαντήσετε σε αυτό το email, γιατί δεν παρακολουθείται η συγκεκριμένη διεύθυνση.'.$crlf.''.$crlf.'Παρακαλώ διατηρήστε αυτό το email στο αρχείο σας έως το τέλος του εξαμήνου.';
     $headers = 'From: noreply@spam.vlsi.gr'."\r\n".'Reply-To: noreply@spam.vlsi.gr'."\r\n".'Content-Type: text/plain; charset=UTF-8' . "\r\n" .'MIME-Version: 1.0' .    "\r\n" .'Content-Transfer-Encoding: quoted-printable' . "\r\n" .'X-Mailer: PHP/'.phpversion();
 
 
@@ -194,7 +194,7 @@ function sendEmail($email, $full_name, $aem_borrow, $dateDiff, $equipmentName) {
 
 function sendSMS($full_name, $telephone, $aem_borrow, $dateDiff, $equipmentName){
     include("views/connection.php");
-    $aemTest = 541;
+    $aemTest = $aem_borrow;
     $number = 69;
     $telephoneToMatch = $number.'%';
     $borrowQuerySQL = "SELECT * FROM users_svds WHERE telephone LIKE :telephoneToSearch AND aem= :aemUser";
@@ -240,12 +240,59 @@ function sendSMS($full_name, $telephone, $aem_borrow, $dateDiff, $equipmentName)
             curl_setopt($ch,CURLOPT_RETURNTRANSFER, true); 
 
             $result = curl_exec($ch);
-            echo $result;
+            
             }else {
                 echo "Για το χρήστη δεν έχουμε νούμερο που να αρχίζει από 69 ή δεν είναι 10ψήφιος.";
             }
     }
 }
 
+function reminder($full_name, $telephone, $aem_borrow, $dateDiff, $equipmentName){
+    include("views/connection.php");
+    $aemTest = $aem_borrow;
+    $number = 69;
+    $telephoneToMatch = $number.'%';
+    $borrowQuerySQL = "SELECT * FROM users_svds WHERE telephone LIKE :telephoneToSearch AND aem= :aemUser";
+    $borrowQuerySTMT = $db->prepare($borrowQuerySQL);
+    $borrowQuerySTMT->bindParam(':telephoneToSearch', $telephoneToMatch, PDO::PARAM_INT);
+    $borrowQuerySTMT->bindParam(':aemUser', $aemTest, PDO::PARAM_INT); 
+    $borrowQuerySTMT->execute();
+
+    while ($borrowQuerySTMTResult=$borrowQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+        if ($borrowQuerySTMT->rowCount() > 0 AND strlen($borrowQuerySTMTResult['telephone']) == 10){
+            $url = 'http://vlsi.gr/sms/webservice/process.php';;
+            if ($dateDiff < 0) {
+                $fields = [
+                'authcode'  => 546743,
+                'method'  => 'POST',
+                'mobilenr' => $telephone,
+                'message' => 'I-Loan: κ. [ '.$full_name.' ], AEM ['.$aem_borrow.'] ο δανεισμός για ['.$equipmentName.'] έχει λήξει εδώ και '.abs($dateDiff).' μέρες.'
+                ];    
+            }else {
+                $fields = [
+                'authcode'  => 546743,
+                'method'  => 'POST',
+                'mobilenr' => $telephone,
+                'message' => 'I-Loan: κ. [ '.$full_name.' ], AEM ['.$aem_borrow.'] ο δανεισμός για ['.$equipmentName.'] λήγει σε '.$dateDiff.' μέρες.'
+                ];        
+            }
+            
+            $fields_string = http_build_query($fields);
+    
+            $ch = curl_init();
+
+            curl_setopt($ch,CURLOPT_URL, $url);
+            curl_setopt($ch,CURLOPT_POST, count($fields));
+            curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+        
+            curl_setopt($ch,CURLOPT_RETURNTRANSFER, true); 
+
+            $result = curl_exec($ch);
+            
+            }else {
+                echo "Για το χρήστη δεν έχουμε νούμερο που να αρχίζει από 69 ή δεν είναι 10ψήφιος.";
+            }
+    }
+}
 
 ?>

@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,7 +9,7 @@ echo '
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-
+//  Η μεταβλητή $_GET['p'] και ελέγχει τη σελίδα που βρισκόμαστε βάση του pagination
         if (isset($_GET['p'])){
         	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
             $startPagination = ($pageOfPagination- 1) * $limitPagination;
@@ -43,6 +44,7 @@ include("views/navbar.php");
 					   		<button type="submit" name="search" class="btn btn-dark">Αναζήτηση</button>
 					    </form>
 					</div>	  
+					<div class="table-responsive">
  					<table class="table table-bordered table-hover">
 					<thead class="thead-dark">
 					<tr>
@@ -55,6 +57,7 @@ include("views/navbar.php");
 					</tr>
 					</thead>
 		';
+//  Η μεταβλητή $url έχει τεθεί από το $_SERVER['REQUEST_URI'] και ελέγχει το ακριβές url που έχει η σελίδα που βρισκόμαστε		
 		$url = $_SERVER['REQUEST_URI'];
 		$value=(explode("=", $url));
 		if (isset($value[1]) AND $value[1] == ""){
@@ -64,6 +67,9 @@ include("views/navbar.php");
 			 	}else {
 			 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
 			 	}
+			 	if (!file_exists('uploadedImages/'.$imageHashedName)){ 
+					$imageHashedName = "noimage.png";
+				}
 	 			$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
 				$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
 				$descriptionQuerySTMT->bindParam(':idDesc', $equipQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
@@ -117,34 +123,41 @@ include("views/navbar.php");
 
 			
     		$searchQuerySTMT->execute();
-			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
-				if (!$searchQuerySTMTResult['hash_filename']){
-			 		$imageHashedName = "noimage.png";	
-			 	}else {
-			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
-			 	}
-			 	$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
-				$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
-				$descriptionQuerySTMT->bindParam(':idDesc', $searchQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
-				$descriptionQuerySTMT->execute();
-				$descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC);
-				if (($searchQuerySTMTResult['quantity']) > 0 ){
-					echo '
-		 						<tbody>
-		 						<tr>
-							    <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'><img src="uploadedImages/'.$imageHashedName.'"/></a></td>
-							    <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
-							    <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
-							    <td>'.$searchQuerySTMTResult['location_e'].'</td>
-							    <td>'.$searchQuerySTMTResult['quantity'].'</td>
-						    	<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
-						    	</tr>
-							    </tbody>
-					';
-				}else{
-					echo '<p class="alert alert-warning>Δεν βρέθηκαν εξαρτήματα να ταιριάζουν στην αναζήτηση σας.</p>';
+			if ($searchQuerySTMT->rowCount() > 0){
+				while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+					if (!$searchQuerySTMTResult['hash_filename']){
+				 		$imageHashedName = "noimage.png";	
+				 	}else {
+				 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
+				 	}
+				 	if (!file_exists('uploadedImages/'.$imageHashedName)){ 
+						$imageHashedName = "noimage.png";
+					}
+				 	$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
+					$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
+					$descriptionQuerySTMT->bindParam(':idDesc', $searchQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
+					$descriptionQuerySTMT->execute();
+					$descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC);
+					if (($searchQuerySTMTResult['quantity']) > 0 ){
+						echo '
+			 						<tbody>
+			 						<tr>
+								    <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'><img src="uploadedImages/'.$imageHashedName.'"/></a></td>
+								    <td><a href=equipment_details.php?id_equip='.$searchQuerySTMTResult['id_equip'].'>'.$searchQuerySTMTResult['name_e'].'</a></td>
+								    <td>'.$searchQuerySTMTResult['buy_year_e'].'</td>
+								    <td>'.$searchQuerySTMTResult['location_e'].'</td>
+								    <td>'.$searchQuerySTMTResult['quantity'].'</td>
+							    	<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
+							    	</tr>
+								    </tbody>
+						';
+					}else{
+						echo '<p class="alert alert-warning>Δεν βρέθηκαν εξαρτήματα να ταιριάζουν στην αναζήτηση σας.</p>';
+					}
 				}
-			}
+			}else {
+				echo '<p class="alert alert-warning">Δεν βρέθηκαν αποτελέσματα για την αναζήτηση σας.</p>';
+			}	
 		}else {
 			while($equipQuerySTMTResult=$equipQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$equipQuerySTMTResult['hash_filename']){
@@ -152,7 +165,9 @@ include("views/navbar.php");
 			 	}else {
 			 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
 			 	}
-		 		
+		 		if (!file_exists('uploadedImages/'.$imageHashedName)){ 
+					$imageHashedName = "noimage.png";
+				}
 	 			$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
 				$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
 				$descriptionQuerySTMT->bindParam(':idDesc', $equipQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
@@ -214,6 +229,7 @@ include("views/navbar.php");
         echo '
           	</ul>
           	</table>
+            </div>
             </div>
         ';
 

@@ -1,6 +1,7 @@
 <?php	
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">

@@ -1,6 +1,7 @@
 <?php
 //Access: Administrator
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,7 +9,7 @@ echo '
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
 if ($type == 1 OR $type == 2 OR $type == 3){
 
 	echo '
@@ -28,6 +29,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 	';
 
 	$limitPagination = 10;
+//  Η μεταβλητή $_GET['p'] και ελέγχει τη σελίδα που βρισκόμαστε βάση του pagination	
 	if (isset($_GET['p'])){
     	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
         $startPagination = ($pageOfPagination- 1) * $limitPagination;
@@ -103,8 +105,9 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 		if ($searchEquipmentQuerySTMT->rowCount() > 0){
     		while($searchEquipmentQuerySTMTResult=$searchEquipmentQuerySTMT->fetch(PDO::FETCH_ASSOC)){
     				
-	    		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE id_equip_borrow= :idEquip ORDER BY notify10 ASC"; 
+	    		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE history_flag= :history_flag AND id_equip_borrow= :idEquip ORDER BY notify10 ASC"; 
 				$baseQuerySTMT = $db->prepare($baseQuerySQL);
+				$baseQuerySTMT->bindParam(':history_flag', $zero);
 				$baseQuerySTMT->bindParam(':idEquip', $searchEquipmentQuerySTMTResult['id_equip']);
 				$baseQuerySTMT->execute();
 	    		if ($baseQuerySTMT->rowCount() > 0){
@@ -129,9 +132,9 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 				      		}
 							echo '
 								'.$borrowState.'
-								<td>'.$last_name.' '.$first_name.'</td>
-						    	<td>'.$aem .'</td>
-						    	<td>'.$baseQuerySTMTResult['name_e'] .'</td>
+								<td><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+						    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem .'</a></td>
+						    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
 						    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
 						    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
 						    	<td>'.abs(round($baseQuerySTMTResult['notify10'])).' ημέρες</td>
@@ -156,7 +159,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 						}	
 					}
 	    		}else {
-	    			echo '<br><span class="alert alert-warning">Το εξάρτημα που αναζητήσατε δεν έχει δανεισθεί στο παρελθόν.</span><br>';
+	    			echo '<br><span class="alert alert-warning">Δεν υπάρχει κάποιος δανεισμός στο ιστορικό για το εξάρτημα που δώσατε.</span><br>';
 	    		}	
 			}	
 		}else{
@@ -169,101 +172,39 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 		$userQuerySTMT = $db->prepare($userQuerySQL);
 		$userQuerySTMT->bindParam(':aemToFindUser', $aemToFindUser);
 		$userQuerySTMT->execute();
-		while($userQuerySTMTResult=$userQuerySTMT->fetch(PDO::FETCH_ASSOC)){
-			$idToFindUser = $userQuerySTMTResult['id'];
-			$last_name= $userQuerySTMTResult['last_name'];
-  			$first_name= $userQuerySTMTResult['first_name'];
-  			$aem = $userQuerySTMTResult['aem'];
-  			$telephone= $userQuerySTMTResult['telephone'];
-  			$email= $userQuerySTMTResult['email'];
-		}
-		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE id_user_borrow= :idBorrower ORDER BY notify10 ASC"; 
-		$baseQuerySTMT = $db->prepare($baseQuerySQL);
-		$baseQuerySTMT->bindParam(':idBorrower', $idToFindUser);
-		$baseQuerySTMT->execute();
-		if ($baseQuerySTMT->rowCount() > 0){
-			echo $tableTop;
-			while($baseQuerySTMTResult=$baseQuerySTMT->fetch(PDO::FETCH_ASSOC)){
-				if ($baseQuerySTMTResult['history_flag'] == 0){	
-					$now = new DateTime();
-					$dateToCheck = new DateTime($baseQuerySTMTResult['expire_date']);
-					if($dateToCheck >= $now) {
-						$borrowState = '<tr id="borrowStateActive">';
-					}else {
-							$borrowState ='<tr id="borrowStateNotActive">';
-					}
-					echo '
-						'.$borrowState.'
-				    	<td>'.$last_name.' '.$first_name.'</td>
-				    	<td>'.$aem.'</td>
-				    	<td>'.$baseQuerySTMTResult['name_e'] .'</td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
-				    	<td>'.abs(round($baseQuerySTMTResult['notify10'])).' ημέρες</td>
-				    ';
-				  	if ($baseQuerySTMTResult['extend_reason'] != NULL){
-				  		echo '	 
-				  			<td>'.$baseQuerySTMTResult['extend_reason'] .'</td>
-				  	 		</tr>
-				  	 	';	
-				  	}elseif ($baseQuerySTMTResult['borrow_reason']) {
-				  		echo '
-				  			<td>'.$baseQuerySTMTResult['borrow_reason'] .'</td>
-				  	 		</tr>
-				  		';
-				  	}
-				  	else{
-				  		echo '	 
-				  			<td>Δεν υπάρχει λόγος δανειμού.</td>
-				  			</tr>
-				  	 	';
-				  	}
-				}		
+		if ($userQuerySTMT->rowCount() > 0){
+			while($userQuerySTMTResult=$userQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+				$idToFindUser = $userQuerySTMTResult['id'];
+				$last_name= $userQuerySTMTResult['last_name'];
+	  			$first_name= $userQuerySTMTResult['first_name'];
+	  			$aem = $userQuerySTMTResult['aem'];
+	  			$telephone= $userQuerySTMTResult['telephone'];
+	  			$email= $userQuerySTMTResult['email'];
 			}
-		}else{
-			echo '<br><span class="alert alert-warning">Το ΑΕΜ δεν αντιστοιχεί σε κάποιο χρήστη.</span><br>';
-		}	
-	}elseif (isset($_POST['borrowerNameQuery'])){
-		
-		$borrowerName = filter_var($_POST['borrowerNameQuery'],FILTER_SANITIZE_STRING);
-		$fullName = (explode(" ", $borrowerName));
-		$lastName = $fullName[0];
-		$firstName = $fullName[1];
-
-		$searchEquipmentQuerySQL = "SELECT * FROM users_svds WHERE last_name LIKE :lastName AND first_name LIKE :firstName";
-		$searchEquipmentQuerySTMT = $db->prepare($searchEquipmentQuerySQL);	
-		$searchEquipmentQuerySTMT->bindParam(':lastName', $lastName);
-		$searchEquipmentQuerySTMT->bindParam(':firstName', $firstName); 
-		$searchEquipmentQuerySTMT->execute();
-		
-		while($searchEquipmentQuerySTMTResult=$searchEquipmentQuerySTMT->fetch(PDO::FETCH_ASSOC)){
-			
-    		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE id_user_borrow= :id ORDER BY notify10 ASC"; 
+			$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE history_flag= :history_flag AND id_user_borrow= :idBorrower ORDER BY notify10 ASC"; 
 			$baseQuerySTMT = $db->prepare($baseQuerySQL);
-			$baseQuerySTMT->bindParam(':id', $searchEquipmentQuerySTMTResult['id']);
+			$baseQuerySTMT->bindParam(':history_flag', $zero);
+			$baseQuerySTMT->bindParam(':idBorrower', $idToFindUser);
 			$baseQuerySTMT->execute();
-    		if ($baseQuerySTMT->rowCount() > 0){
-    			echo $tableTop;
-    			while($baseQuerySTMTResult=$baseQuerySTMT->fetch(PDO::FETCH_ASSOC)){
-    				if ($baseQuerySTMTResult['history_flag'] == 0){
-		    			$now = new DateTime();
+			if ($baseQuerySTMT->rowCount() > 0){
+				echo $tableTop;
+				while($baseQuerySTMTResult=$baseQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+					if ($baseQuerySTMTResult['history_flag'] == 0){	
+						$now = new DateTime();
 						$dateToCheck = new DateTime($baseQuerySTMTResult['expire_date']);
 						if($dateToCheck >= $now) {
 							$borrowState = '<tr id="borrowStateActive">';
 						}else {
 								$borrowState ='<tr id="borrowStateNotActive">';
 						}
-			      		$last_name= $searchEquipmentQuerySTMTResult['last_name'];
-			      		$first_name= $searchEquipmentQuerySTMTResult['first_name'];
-			      		$aem= $searchEquipmentQuerySTMTResult['aem'];
 						echo '
 							'.$borrowState.'
-				    	<td>'.$last_name.' '.$first_name.'</td>
-				    	<td>'.$aem.'</td>
-				    	<td>'.$baseQuerySTMTResult['name_e'] .'</td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
-				    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
-				    	<td>'.abs(round($baseQuerySTMTResult['notify10'])).' ημέρες</td>
+					    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+					    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem .'</a></td>
+					    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
+					    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
+					    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+					    	<td>'.abs(round($baseQuerySTMTResult['notify10'])).' ημέρες</td>
 					    ';
 					  	if ($baseQuerySTMTResult['extend_reason'] != NULL){
 					  		echo '	 
@@ -282,16 +223,88 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 					  			</tr>
 					  	 	';
 					  	}
-					}
+					}		
 				}
-    		}else {
-    				echo '<br><span class="alert alert-warning">Το όνομα που εισάγατε δεν αντιστοιχεί σε κάποιο χρήστη.</span><br>';
-    		}
-		}
+			}else{
+				echo '<br><span class="alert alert-warning">Δεν υπάρχει κάποιος δανεισμός στο ιστορικό για το ΑΕΜ που δώσατε.</span><br>';
+			}	
+		}else{
+			echo '<br><span class="alert alert-warning">Δεν υπάρχει κάποιος χρήστης με το ΑΕΜ που δώσατε.</span><br>';
+		}	
+	}elseif (isset($_POST['borrowerNameQuery'])){
+		
+		$borrowerName = filter_var($_POST['borrowerNameQuery'],FILTER_SANITIZE_STRING);
+		$fullName = (explode(" ", $borrowerName));
+		$lastName = $fullName[0];
+		$firstName = $fullName[1];
+
+		$searchEquipmentQuerySQL = "SELECT * FROM users_svds WHERE last_name LIKE :lastName AND first_name LIKE :firstName";
+		$searchEquipmentQuerySTMT = $db->prepare($searchEquipmentQuerySQL);	
+		$searchEquipmentQuerySTMT->bindParam(':lastName', $lastName);
+		$searchEquipmentQuerySTMT->bindParam(':firstName', $firstName); 
+		$searchEquipmentQuerySTMT->execute();
+		
+		if ($searchEquipmentQuerySTMT->rowCount() > 0){
+			while($searchEquipmentQuerySTMTResult=$searchEquipmentQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+	    		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE history_flag= :history_flag AND id_user_borrow= :id ORDER BY notify10 ASC"; 
+				$baseQuerySTMT = $db->prepare($baseQuerySQL);
+				$baseQuerySTMT->bindParam(':history_flag', $zero);
+				$baseQuerySTMT->bindParam(':id', $searchEquipmentQuerySTMTResult['id']);
+				$baseQuerySTMT->execute();
+	    		if ($baseQuerySTMT->rowCount() > 0){
+	    			echo $tableTop;
+	    			while($baseQuerySTMTResult=$baseQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+	    				if ($baseQuerySTMTResult['history_flag'] == 0){
+			    			$now = new DateTime();
+							$dateToCheck = new DateTime($baseQuerySTMTResult['expire_date']);
+							if($dateToCheck >= $now) {
+								$borrowState = '<tr id="borrowStateActive">';
+							}else {
+									$borrowState ='<tr id="borrowStateNotActive">';
+							}
+				      		$last_name= $searchEquipmentQuerySTMTResult['last_name'];
+				      		$first_name= $searchEquipmentQuerySTMTResult['first_name'];
+				      		$aem= $searchEquipmentQuerySTMTResult['aem'];
+							echo '
+								'.$borrowState.'
+					    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+					    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem .'</a></td>
+					    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
+					    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
+					    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
+					    	<td>'.abs(round($baseQuerySTMTResult['notify10'])).' ημέρες</td>
+						    ';
+						  	if ($baseQuerySTMTResult['extend_reason'] != NULL){
+						  		echo '	 
+						  			<td>'.$baseQuerySTMTResult['extend_reason'] .'</td>
+						  	 		</tr>
+						  	 	';	
+						  	}elseif ($baseQuerySTMTResult['borrow_reason']) {
+						  		echo '
+						  			<td>'.$baseQuerySTMTResult['borrow_reason'] .'</td>
+						  	 		</tr>
+						  		';
+						  	}
+						  	else{
+						  		echo '	 
+						  			<td>Δεν υπάρχει λόγος δανειμού.</td>
+						  			</tr>
+						  	 	';
+						  	}
+						}
+					}
+	    		}else {
+	    			echo '<br><span class="alert alert-warning">Δεν υπάρχει κάποιος δανεισμός στο ιστορικό για το χρήστη που δώσατε.</span><br>';
+	    		}
+			}
+		}else {
+			echo '<br><span class="alert alert-warning">Δεν υπάρχει χρήστης με το ΑΕΜ που δώσατε.</span><br>';
+		}	
 	}elseif(isset($_POST['startDate']) AND isset($_POST['endDate'])){
 		
-		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE start_date >= :startDate AND expire_date <= :endDate ORDER BY notify10 DESC"; 
+		$baseQuerySQL = "SELECT * FROM borrow_svds INNER JOIN equip_svds on borrow_svds.id_equip_borrow = equip_svds.id_equip WHERE history_flag= :history_flag AND start_date >= :startDate AND expire_date <= :endDate ORDER BY notify10 DESC"; 
   		$baseQuerySTMT = $db->prepare($baseQuerySQL);
+  		$baseQuerySTMT->bindParam(':history_flag', $zero);
   		$baseQuerySTMT->bindParam(':startDate', $_POST['startDate']);
   		$baseQuerySTMT->bindParam(':endDate', $_POST['endDate']);
   		$baseQuerySTMT->execute();
@@ -317,9 +330,9 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 		      		}
 					echo '
 						'.$borrowState.'
-          			<td>'.$last_name.' '.$first_name.'</td>
-          			<td>'.$aem.'</td>
-          			<td>'.$baseQuerySTMTResult['name_e'] .'</td>
+          			<td><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem .'</a></td>
+          			<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'] .'</a></td>
           			<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
           			<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
           			<td>'.abs(round($baseQuerySTMTResult['notify10'])).' ημέρες</td>
@@ -344,7 +357,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 		        }      
     		}
     	}else {
-    		echo '<br><span class="alert alert-warning">Δεν βρέθηκαν δανεισμοί για το χρονικό διάστημα που ζητήσατε.</span><br>';
+    		echo '<br><span class="alert alert-warning">Δεν βρέθηκαν δανεισμοί στο ιστορικό για το χρονικό διάστημα που ζητήσατε.</span><br>';
     	}
 	}else {
 		echo $tableTop;
@@ -368,9 +381,9 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 	      		}
 				echo '
 					'.$borrowState.'
-			    	<td>'.$last_name.' '.$first_name.'</td>
-			    	<td>'.$aem.'</td>
-			    	<td>'.$baseQuerySTMTResult['name_e'] .'</td>
+			    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$last_name.' '.$first_name.'</a></td>
+			    	<td><a href=borrow_user.php?id_user='.$aem.'>'.$aem .'</a></td>
+			    	<td><a href=equipment_details.php?id_equip='.$baseQuerySTMTResult['id_equip'].'>'.$baseQuerySTMTResult['name_e'].'</a></td>
 			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['start_date'])).'</td>
 			    	<td>'.date('d/m/Y',strtotime($baseQuerySTMTResult['expire_date'])).'</td>
 			    	<td>'.abs(round($baseQuerySTMTResult['notify10'])).' ημέρες</td>
@@ -443,7 +456,7 @@ if ($type == 1 OR $type == 2 OR $type == 3){
 		';
 	}			
 }else {
-	header("Location: index.php");
-	die("Δεν έχετε συνδεθεί");
+    header("Location: index.php");
+    die("Δεν δικαιώματα εισόδου σε αυτή τη σελίδα.");
 }	
 ?>

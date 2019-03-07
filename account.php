@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -11,7 +12,7 @@ include("views/navbar.php");
 	echo '
 		<div class="container personalInformation">
 			<h2>Προσωπικά Στοιχεία Χρήστη</h2>
-			<h4>Έχετε συνδεθεί ως: '.$fullName.'<hr></h4>
+			<h4>Έχετε συνδεθεί ως: '.$fullName.'</h4><hr>
 			<div class="jumbotron">
 				<div class="prof-info">
 				   <div class="info"><label> Όνομα Χρήστη:</label>  <span>'.$first_name.'</span></div>

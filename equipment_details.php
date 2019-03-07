@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -37,9 +38,13 @@ include("views/navbar.php");
 			 		$descriptionQuerySTMT->execute();
 			 		while($descriptionQuerySTMTResult=$descriptionQuerySTMT->fetch(PDO::FETCH_ASSOC)){	
 			 			if (!$equipQuerySTMTResult['hash_filename']){
-						 		$imageHashedName = "noimage.png";	
+						 	$imageHashedName = "noimage.png";	
 						}else {
-						 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
+						 	$imageHashedName = $equipQuerySTMTResult['hash_filename'];
+						}
+						
+						if (!file_exists('uploadedImages/'.$imageHashedName)){ 
+							$imageHashedName = "noimage.png";
 						}
 				 			echo '
 					 			<div class="container">
@@ -50,7 +55,7 @@ include("views/navbar.php");
 										    <img id="imageToOpen" class="card-img-top equipmentDetailsImage" src="uploadedImages/'.$imageHashedName.'" alt="">
 										    <div id="myModal" class="modal">
 										    	<span class="close">&times;</span>
-												<img class="modal-content" id="openedImage">
+												<img src="" class="modal-content" id="openedImage">
 											</div>
 										    <div class="card-body">
 											    <h4 class="card-title">'.$equipQuerySTMTResult['name_e'].'<button type="submit" class="btn btn-secondary add_to_basket" name_basket="'.$equipQuerySTMTResult['name_e'].'" id_user_basket='.$_SESSION['id'].' id_equip_basket='.$equipQuerySTMTResult['id_equip'].'>Καλάθι</button></h4>
@@ -106,7 +111,7 @@ include("views/navbar.php");
 					 		$borrowQuerySTMT->bindParam(':history_flag', $zero, PDO::PARAM_INT); 
 					 		$borrowQuerySTMT->execute();
 					 		if ($borrowQuerySTMT->rowCount() == 0 ){
-					 			echo '<p class="alert alert-warning">Δεν υπάρχουν δανεισμοί για αυτό το εξάρτημα.</p>
+					 			echo '<p class="alert alert-warning">Δεν υπάρχουν παλαιότεροι δανεισμοί για αυτό το εξάρτημα.</p>
 					 				</div>
 					 			';
 					 		}else {
@@ -142,7 +147,13 @@ include("views/navbar.php");
 									 		$commentsDisplayQuerySTMT->bindParam(':idToShow', $idToShow, PDO::PARAM_INT); 
 									 		$commentsDisplayQuerySTMT->execute();
 									 		if ($commentsDisplayQuerySTMT->rowCount() == 0 ){
-									 			echo 'Δεν υπάρχουν σχόλια για αυτό το εξάρτημα.';
+									 			echo 'Δεν υπάρχουν σχόλια για αυτό το εξάρτημα.<br>
+				 									<div id="bottom"></div>
+				 									<form class="form-inline" method="POST" id="newComment">
+														<textarea name="newComment" id="equipmentDetailsCommentArea"></textarea><br>
+														<button id="commentAreaButton" type="submit">Καταχώρηση Σχολίου</button> 
+													</form>
+				 								';
 									 		}else {
 				 								while($commentsDisplayQuerySTMTResult=$commentsDisplayQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				 									$userCommentQuerySQL = "SELECT first_name, last_name FROM users_svds WHERE id= :idUser";
@@ -163,7 +174,7 @@ include("views/navbar.php");
 					 										echo '
 					 											<div class="col-md-2">
 					 												<div class="detailsButtons">
-					 													<a href=functions_equipment.php?function=deleteComment&id_comment='.$commentsDisplayQuerySTMTResult['id_comment'].'&idToShow='.$idToShow.' id="deleteComment" name="deleteComment"><p class="fas fa-trash-alt" title=Διαγραφή></p></a>
+					 													<a href=actions_equipment.php?action=deleteComment&id_comment='.$commentsDisplayQuerySTMTResult['id_comment'].'&idToShow='.$idToShow.' id="deleteComment" name="deleteComment"><p class="fas fa-trash-alt" title=Διαγραφή></p></a>
 					 												</div>	
 					 											</div>
 					 										  </div>

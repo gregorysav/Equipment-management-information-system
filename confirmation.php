@@ -1,6 +1,7 @@
 <?php
 //Access: Administrator
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,7 +9,8 @@ echo '
 include("views/connection.php"); 
 include("views/header.php");
 include("views/navbar.php");
-
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
+if ($type !=0){
 	echo'
 		<p class="alert alert-warning" id="messageToWait" hidden>Παρακαλώ κάντε λίγη υπομονή για την αποστολή των απαραίτητων μηνυμάτων</p>
 	';	
@@ -52,7 +54,10 @@ include("views/navbar.php");
 			}	
 		}		      
 	}
-	
+}else {
+    header("Location: index.php");
+    die("Δεν δικαιώματα εισόδου σε αυτή τη σελίδα.");
+}	
 include("views/footer.php");
 echo '
 	</body>

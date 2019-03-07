@@ -4,8 +4,8 @@ if(!isset($_SESSION))
 { 
     session_start(); 
 }
-include("views/connection.php");
 include("checkUser.php");
+include("views/connection.php");
 
     $zero= 0;
 	$one = 1;
@@ -52,5 +52,6 @@ include("checkUser.php");
 	$providersNameArray = array();
 	$basketItems = 0;
 	$nothing = NULL;
+	$null= NULL;
 
 ?>    

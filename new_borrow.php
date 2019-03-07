@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -18,9 +19,10 @@ include("views/navbar.php");
 	';
 	if (isset($_GET['equipmentName'])){
 		$equipmentName = filter_var($_GET['equipmentName'],FILTER_SANITIZE_STRING);
-		$searchQuerySQL = "SELECT * FROM equip_svds WHERE name_e LIKE :keyword ORDER BY id_equip DESC";
+		$searchQuerySQL = "SELECT * FROM equip_svds WHERE name_e LIKE :keyword AND quantity> :zero ORDER BY id_equip DESC";
 		$searchQuerySTMT = $db->prepare($searchQuerySQL);
-		$searchQuerySTMT->bindParam(':keyword', $equipmentName); 
+		$searchQuerySTMT->bindParam(':keyword', $equipmentName);
+		$searchQuerySTMT->bindParam(':zero', $zero); 
 		$searchQuerySTMT->execute();
 		$searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC);
 		if (!$searchQuerySTMTResult['hash_filename']){
@@ -56,15 +58,17 @@ include("views/navbar.php");
 			echo "Δεν βρέθηκε εξάρτημα να ταιρίαζει στην αναζήτηση.";
 		}
 	}else{
+//  Η μεταβλητή $_GET['p'] και ελέγχει τη σελίδα που βρισκόμαστε βάση του pagination		
 			if (isset($_GET['p'])){
 	        	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
 	            $startPagination = ($pageOfPagination- 1) * $limitPagination;
 	        }
 
-			$equipQuerySQL = "SELECT * FROM equip_svds ORDER BY id_equip DESC LIMIT :startPagination, :limitPagination";
+			$equipQuerySQL = "SELECT * FROM equip_svds WHERE quantity> :zero ORDER BY id_equip DESC LIMIT :startPagination, :limitPagination";
 			$equipQuerySTMT = $db->prepare($equipQuerySQL);
 			$equipQuerySTMT->bindParam(':startPagination', $startPagination, PDO::PARAM_INT);
 			$equipQuerySTMT->bindParam(':limitPagination', $limitPagination, PDO::PARAM_INT); 
+		 	$equipQuerySTMT->bindParam(':zero', $zero, PDO::PARAM_INT); 
 		 	$equipQuerySTMT->execute();
 			echo '
 			    <div class="container">
@@ -100,8 +104,9 @@ include("views/navbar.php");
 				}
 			}
 
-			$rowsQuerySQL = "SELECT * FROM equip_svds";
+			$rowsQuerySQL = "SELECT * FROM equip_svds WHERE quantity> :zero";
 	 		$rowsQuerySTMT = $db->prepare($rowsQuerySQL);
+	 		$rowsQuerySTMT->bindParam(':zero', $zero, PDO::PARAM_INT); 
 	 		$rowsQuerySTMT->execute();		
 			$rowsNumberPagination = $rowsQuerySTMT->rowCount();
 	        $totalCellsPagination = ceil($rowsNumberPagination/$limitPagination);

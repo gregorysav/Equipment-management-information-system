@@ -1,0 +1,715 @@
+<?php //Access: Registered Users ?>
+html {
+  height: 100%;
+}
+
+body {
+  position: relative;
+}
+
+#logInForm {
+  text-align: center;
+  width: 400px;
+  margin-top: 100px;
+}
+
+img{
+  width: 150px;
+  height: 150px;
+  float: left;
+  margin: 1.66%;
+  background-color: white;
+}
+
+#uowmiconIndexPage {
+  width: 20%;
+  height: 15%;
+  float: left;
+  margin: 1.66%;
+  background-color: white;
+}
+
+#welcome {
+  height: 15%;
+  padding: 60px;
+  font-size: 30px;
+}
+
+
+div p { 
+    color: black;
+}
+
+.table {
+  width: 80%;
+  margin: 0 auto;
+}
+
+#confirmationPageResults {
+  border-style: double;
+}
+
+#borrowExplanationTextarea {
+  width: 35%;
+}
+
+#baskePageTable {
+  width: 50%;
+  margin: 0 auto;
+}
+
+#baskePageContainer {
+  text-align: center;
+  
+}
+
+#basketPageButtons {
+  display: inline-block;
+}
+
+a:visited {
+  color: white; 
+}
+
+td a {
+  color: black; 
+}
+
+#dropDown a {
+  background-color: #212529;
+  color: white;
+}
+
+#dropDown a:hover {
+  background-color: #212529;
+}
+
+
+#dropDownButton a:hover {
+  background-color: #212529;
+  color: white;
+}
+
+td a:visited {
+  color: black; 
+}
+
+button a {
+  color: white;
+}
+
+button a:visited {
+  color: white;
+}
+
+hr {
+  border: none;
+  height: 2px;
+  color: black;
+  background-color: black; 
+}
+
+#stateIconSuccess {
+  border: 0;
+  color: green;
+}
+
+#stateIconNoSuccess {
+  border: 0;
+  color: red;
+} 
+
+#searchHolder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  
+  html {
+  height: 1000px;
+  }
+
+  .btn-group button {
+    text-align: left;
+  } 
+
+  .form-inline input {
+    margin: 5px 0;
+  }
+
+  .form-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchTerm input {
+    width: 350px;
+    padding-left: 40px;
+  }
+
+  tr {
+    font-size: 11px;
+  }
+
+  #indexPage img {
+    width: 300px;
+    height: 350;
+    padding-left: 150px;
+  }
+
+  #indexPage p {
+    text-align: center;
+  }
+
+  #welcome {
+    font-size: 30px;
+    padding-left: 80px;
+  } 
+
+  #indexPicture {
+    display: flex;
+  align-items: center;
+  justify-content: center;
+    align-content: center;
+  }
+
+  #footerMessage{
+  opacity: 0.0;
+  }
+
+  a:hover {
+    background-color: #212529;
+    color: white;
+  }
+  
+  #navbarButtons a {
+    color: white;  
+    display: inline-block;
+  } 
+
+  .personalInformation hr {
+    display: none;
+  }
+
+}
+
+.btn-group button {
+  text-align: left;
+}
+
+#welcomeMessageIndexPage {
+  color: black;
+  position: absolute;
+  right: 10%;
+}
+
+#indexPage p {
+  padding-left: 60px;
+}
+
+#footerMessage{
+    padding-top: 25px; 
+    font-size: 12px;
+    text-align: center;
+}
+
+#footerMessage a:visited{
+  color: #337ab7;
+}
+
+#navbarButtons {
+  color: #fff;  
+  display: inline-block;
+  right:0; 
+  position:absolute;
+}
+
+
+td img {
+  width: 75px;
+  height: 75px;
+}
+
+td {
+      text-align: center;
+      vertical-align: middle;
+}
+
+tr{
+  height: 50px;
+}
+
+.add_to_basket {
+  text-align: center;
+  vertical-align: middle;
+  margin-left: 25px;
+}
+
+.jumbotron hr {
+  width: 100%;
+  margin: auto;
+}
+
+.pagination a{
+  font-size: 20px;
+  letter-spacing: 15px;
+  text-decoration: none;
+}
+
+.pagination a:visited {
+  color: #212529; 
+  padding: 25px;
+  text-decoration: none;
+}
+
+#imageUpload {
+  margin-top: 15px; 
+}
+
+#imageDelete {
+  margin-top: 15px; 
+}
+
+#filename {
+  margin-top: 20px; 
+}
+
+.equipmentDetailsImage {
+  width: 300px;
+  height: 280px;
+}
+
+#newComment {
+  visibility: hidden;
+}
+
+#equipmentDetailsCommentArea {
+  width: 350px;
+  height: 100px;
+}
+
+.pagination {
+  display: -ms-flexbox;
+  display: flex;
+  padding-left: 0;
+  list-style: none;
+  border-radius: 0.25rem;
+}
+
+#title {
+  text-align: center;
+}
+
+#aemSearchInputFinishPage {
+  width: 350px;
+  text-align: center;
+}
+
+.list-unstyled ul {
+  background-color: #eee;
+  cursor: pointer;
+}
+
+.list-unstyled li {
+    padding: 10px;
+    background-color: #eee;
+    text-align: left;
+}
+
+.extraComment {
+  text-align: center;
+}
+
+#options {
+  font-size: 20px;
+  text-align: center;
+}
+
+#newProviderAdd {
+  color: black;
+}
+
+#newDepartmentAdd {
+  color: black;
+}
+
+.close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-content {
+  margin: auto auto;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+.modal {
+  display: none;
+  position: fixed; 
+  padding:  80px 80px 80px 80px; 
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgb(0,0,0); 
+  background-color: rgba(0,0,0,0.9); 
+}
+
+#imageToOpen {
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#imageToOpen:hover {opacity: 0.7;}
+
+@-webkit-keyframes zoom {
+  from {-webkit-transform:scale(0)} 
+  to {-webkit-transform:scale(1)}
+}
+
+@keyframes zoom {
+  from {transform:scale(0)} 
+  to {transform:scale(1)}
+}
+
+#commentsHr {
+  height: 1px;
+}
+
+#scrollableComments {
+  overflow-y: scroll;
+  height: 880px;
+}
+
+#scrollableRecentBorrowers {
+  overflow-y: scroll;
+  height: 200px;
+}
+
+#finishRemove {
+  color: black;
+}
+
+#equipmentPageButtons a{
+  width: 90px;
+}
+
+#equipmentPageButtons a:visited {
+  color: white;
+}
+
+#providerPageButtons a{
+  width: 90px;
+}
+
+#providerPageButtons a:visited {
+  color: white;
+}
+
+#departmentPageButtons a{
+  width: 90px;
+}
+
+#departmentPageButtons a:visited {
+  color: white;
+}
+
+.searchTerm {
+  width: 350px;
+  padding-top: 20px;
+}
+
+.selectOptionInput {
+  width: 400px;
+}
+
+.returnEquipmentTable td a:visited{
+  color: white;
+}
+
+.returnEquipmentTable {
+  max-width: 90%;
+}
+
+.selectOption {
+  color: black;
+  text-align: center;
+  border: none;
+  border-bottom: 1px solid #CCC;
+  margin-right: 30px;
+}
+
+.container > .dropdown {
+  margin: 0 20px;
+  vertical-align: top;
+}
+
+.dropdown {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  height: 30px;
+  width: 200px;
+  background: #f2f2f2;
+  border: 1px solid;
+  border-color: white #f7f7f7 whitesmoke;
+  border-radius: 3px;
+  background-image: -webkit-linear-gradient(top, transparent, rgba(0, 0, 0, 0.06));
+  background-image: -moz-linear-gradient(top, transparent, rgba(0, 0, 0, 0.06));
+  background-image: -o-linear-gradient(top, transparent, rgba(0, 0, 0, 0.06));
+  background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.06));
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.dropdown:before, .dropdown:after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 9px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border: 4px dashed;
+  border-color: #888888 transparent;
+  pointer-events: none;
+}
+
+.dropdown:before {
+  border-bottom-style: solid;
+  border-top: none;
+}
+
+.dropdown:after {
+  margin-top: 7px;
+  border-top-style: solid;
+  border-bottom: none;
+}
+
+.dropdown-select {
+  position: relative;
+  width: 130%;
+  margin: 0;
+  padding: 6px 8px 6px 10px;
+  height: 28px;
+  line-height: 14px;
+  font-size: 12px;
+  color: #62717a;
+  text-shadow: 0 1px white;
+  background: #f2f2f2; /* Fallback for IE 8 */
+  background: rgba(0, 0, 0, 0) !important; /* "transparent" doesn't work with Opera */
+  border: 0;
+  border-radius: 0;
+  -webkit-appearance: none;
+}
+
+.dropdown-select:focus {
+  z-index: 3;
+  width: 100%;
+  color: #394349;
+  outline: 2px solid #49aff2;
+  outline: 2px solid -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+
+.dropdown-select > option {
+  margin: 3px;
+  padding: 6px 8px;
+  text-shadow: none;
+  background: #f2f2f2;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* Fix for IE 8 putting the arrows behind the select element. */
+
+.lt-ie9 .dropdown {
+  z-index: 1;
+}
+
+.lt-ie9 .dropdown-select {
+  z-index: -1;
+}
+
+.lt-ie9 .dropdown-select:focus {
+  z-index: 3;
+}
+
+/* Dirty fix for Firefox adding padding where it shouldn't. */
+
+@-moz-document url-prefix() {
+  .dropdown-select {
+    padding-left: 6px;
+  }
+}
+
+.dropdown-dark {
+  background: #444;
+  border-color: #111111 #0a0a0a black;
+  background-image: -webkit-linear-gradient(top, transparent, rgba(0, 0, 0, 0.4));
+  background-image: -moz-linear-gradient(top, transparent, rgba(0, 0, 0, 0.4));
+  background-image: -o-linear-gradient(top, transparent, rgba(0, 0, 0, 0.4));
+  background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.4));
+  -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-dark:before {
+  border-bottom-color: #aaa;
+}
+
+.dropdown-dark:after {
+  border-top-color: #aaa;
+}
+
+.dropdown-dark .dropdown-select {
+  color: #aaa;
+  text-shadow: 0 1px black;
+  background: #444;  /* Fallback for IE 8 */
+}
+
+.dropdown-dark .dropdown-select:focus {
+  color: #ccc;
+}
+
+.dropdown-dark .dropdown-select > option {
+  background: #444;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.returnPageTable {
+  border: solid 0.5px;
+}
+
+.returnPageTable td {
+  border: solid 0.5px;
+}
+
+.returnPageTable tr {
+  border: solid 0.5px;
+}
+
+#borrowStateNotActive {
+  color: red;
+}
+
+#borrowStateActive {
+  color: green;
+}
+
+#borrowStateNotActive a {
+  color: red;
+}
+
+#borrowStateActive a {
+  color: green;
+}
+
+#buttonToReturnEquipment a {
+    color: white;
+    width: 120px;
+}
+
+#notAprrovedBorrow a {
+  color: red;
+  border: 1px solid;
+}
+
+
+.material-switch > input[type="checkbox"] {
+  display: none;   
+}
+
+.material-switch > label {
+  cursor: pointer;
+  height: 0px;
+  position: relative; 
+  width: 40px;  
+}
+
+.material-switch > label::before {
+  background: rgb(0, 0, 0);
+  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  content: '';
+  height: 16px;
+  margin-top: -8px;
+  position:absolute;
+  opacity: 0.3;
+  transition: all 0.4s ease-in-out;
+  width: 40px;
+}
+.material-switch > label::after {
+  background: rgb(255, 255, 255);
+  border-radius: 16px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  content: '';
+  height: 24px;
+  left: -4px;
+  margin-top: -8px;
+  position: absolute;
+  top: -4px;
+  transition: all 0.3s ease-in-out;
+  width: 24px;
+}
+.material-switch > input[type="checkbox"]:checked + label::before {
+  background: inherit;
+  opacity: 0.5;
+}
+.material-switch > input[type="checkbox"]:checked + label::after {
+  background: inherit;
+  left: 20px;
+}
+
+.detailsButtons {
+  margin-top: 50%;
+  padding: 10px;
+}
+
+.personalInformation {
+  text-align: center;
+}
+
+.personalInformation label {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.personalInformation hr {
+  width: 40%;
+  height: 1px;
+}
+
+.showBorrowerInfo {
+  cursor: help;
+}
+
+#createCSVForm {
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#imageToShowUserBorrow {
+  max-height: 100px;
+  max-width: 100px;
+}

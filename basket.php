@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
     <!DOCTYPE html>
     <html lang="en">
@@ -8,8 +9,8 @@ echo '
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-
-
+// Στη μεταβλητή $_SESSION['equipmentToBorrow'] αποθηκεύονται τα εξαρτήματα που υπάρχουν στον καλάθι 
+$_SESSION['equipmentToBorrow'] = "";
 $basketQuerySQL = "SELECT * FROM basket_svds WHERE id_user_basket= :idUser";
 $basketQuerySTMT = $db->prepare($basketQuerySQL); 
 $basketQuerySTMT->bindParam(':idUser', $id, PDO::PARAM_INT);
@@ -41,12 +42,13 @@ if ($basketQuerySTMTResult == 0){
 }
 
 while($basketQuerySTMTResult=$basketQuerySTMT->fetch(PDO::FETCH_ASSOC)){
+    $_SESSION['equipmentToBorrow'] .= $basketQuerySTMTResult['name_basket'].',';
     echo '
         <tbody>
         <tr>
         <td>'.$basketQuerySTMTResult['id_equip_basket'].'</td>
         <td>'.$basketQuerySTMTResult['name_basket'].'</td>
-        <td><a href="functions.php?function=removeFromBasket&id_basket='.$basketQuerySTMTResult['id_basket'].'&id_user_basket='.$_SESSION['id'].'&id_equip_basket='.$basketQuerySTMTResult['id_equip_basket'].'"><p><span class="fa fa-minus-circle"></span></p></a></td>
+        <td><a href="actions.php?action=removeFromBasket&id_basket='.$basketQuerySTMTResult['id_basket'].'&id_user_basket='.$_SESSION['id'].'&id_equip_basket='.$basketQuerySTMTResult['id_equip_basket'].'"><p><span class="fa fa-minus-circle"></span></p></a></td>
         </tr>
         </tbody>
     ';

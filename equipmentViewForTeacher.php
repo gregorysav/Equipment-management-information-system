@@ -1,6 +1,7 @@
 <?php
 //Access: Administrator
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,7 +9,9 @@ echo '
 include("views/connection.php");
 include("views/header.php");
 include("views/navbar.php");
-	
+include("functions.php");
+//  Η μεταβλητή $type έχει τεθεί από το $_SESSION['type'] και ελέγχει το επίπεδο δικαιωμάτων του συνδεδεμένου χρήστη
+	if ($type != 0){	
 		if ($type == 1 OR $type == 2 OR $type == 3){
 			echo '
 				<div class="container" id="tableEquipment">
@@ -17,17 +20,22 @@ include("views/navbar.php");
 		        </div><br>
 				</div>
 			';
-		}
-
+		}	
+		
+		if (isset($_POST['createCSV'])){
+			createCSV($_SESSION['itemsToImportCSV']);
+		}	
+//  Η μεταβλητή $_GET['p'] και ελέγχει τη σελίδα που βρισκόμαστε βάση του pagination
         if (isset($_GET['p'])){
         	$pageOfPagination = filter_var($_GET['p'],FILTER_SANITIZE_NUMBER_FLOAT);
             $startPagination = ($pageOfPagination- 1) * $limitPagination;
         }
 
-		$equipQuerySQL = "SELECT * FROM equip_svds ORDER BY id_equip DESC LIMIT :startPagination, :limitPagination";
+		$equipQuerySQL = "SELECT * FROM equip_svds WHERE quantity> :zero ORDER BY id_equip DESC LIMIT :startPagination, :limitPagination";
 		$equipQuerySTMT = $db->prepare($equipQuerySQL);
 		$equipQuerySTMT->bindParam(':startPagination', $startPagination, PDO::PARAM_INT);
-		$equipQuerySTMT->bindParam(':limitPagination', $limitPagination, PDO::PARAM_INT); 
+		$equipQuerySTMT->bindParam(':limitPagination', $limitPagination, PDO::PARAM_INT);
+		$equipQuerySTMT->bindParam(':zero', $zero, PDO::PARAM_INT); 
 	 	$equipQuerySTMT->execute();
 	 	
 	 	echo '
@@ -51,8 +59,9 @@ include("views/navbar.php");
 							<input type="text" name="yearOfBuy"  class="form-control input-lg" id="yearOfBuy" autocomplete="off" placeholder="Ημερομηνία απόκτησης"/>
 							<input type="text" name="locationName"  class="form-control input-lg" id="locationName" autocomplete="off" placeholder="Τοποθεσία"/>
 							<button type="submit" name="search" class="btn btn-dark">Αναζήτηση</button>
-					    </form>
-					</div>	  
+					    </form><br>
+					</div>
+					<div class="table-responsive">	  
  					<table class="table table-bordered table-hover">
 					<thead class="thead-dark">
 					<tr>
@@ -66,12 +75,15 @@ include("views/navbar.php");
 					</tr>
 					</thead>
 		';
+//  Η μεταβλητή $url έχει τεθεί από το $_SERVER['REQUEST_URI'] και ελέγχει το ακριβές url που έχει η σελίδα που βρισκόμαστε			
 		$url = $_SERVER['REQUEST_URI'];
 		$value=(explode("=", $url));
 		if (isset($value[1]) AND $value[1] == ""){
-			echo '<meta http-equiv="refresh" content="0; URL=test.php">';
+			echo '<meta http-equiv="refresh" content="0; URL=equipmentViewForTeacher.php">';
 		}
 		if (isset($_POST['search'])){
+			$itemsToImportCSV = array();
+			$itemsToImportCSV[]= "Ονομασία, Χρονολογία, Τοποθεσία, Απόθεμα";
 			if (isset($_POST['equipmentName'])){
 				$equipmentName = filter_var($_POST['equipmentName'],FILTER_SANITIZE_STRING);
 				$equipmentName = '%'.$equipmentName.'%';
@@ -99,12 +111,16 @@ include("views/navbar.php");
 
 			
     		$searchQuerySTMT->execute();
+		if ($searchQuerySTMT->rowCount() > 0){
 			while ($searchQuerySTMTResult=$searchQuerySTMT->fetch(PDO::FETCH_ASSOC)){
 				if (!$searchQuerySTMTResult['hash_filename']){
 			 		$imageHashedName = "noimage.png";	
 			 	}else {
 			 		$imageHashedName = $searchQuerySTMTResult['hash_filename'];
 			 	}
+			 	if (!file_exists('uploadedImages/'.$imageHashedName)){ 
+					$imageHashedName = "noimage.png";
+				}
 			 	$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
 				$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
 				$descriptionQuerySTMT->bindParam(':idDesc', $searchQuerySTMTResult['short_desc_e'], PDO::PARAM_INT); 
@@ -120,14 +136,29 @@ include("views/navbar.php");
 							    <td>'.$searchQuerySTMTResult['location_e'].'</td>
 							    <td>'.$searchQuerySTMTResult['quantity'].'</td>
 						    	<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
-						    	<td id="equipmentPageButtons"><a href=functions_equipment.php?function=delete&id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark" id="delete" name="delete">Διαγραφή</a><br><a href=functions_equipment.php?function=update&id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark" id="modify" name="modify">Αλλαγή</a><br><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark" id="addImage" name="addImage">Εικόνα</a></td>
+						    	<td id="equipmentPageButtons"><a href=actions_equipment.php?action=delete&id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark" id="delete" name="delete">Διαγραφή</a><br><a href=actions_equipment.php?action=update&id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark" id="modify" name="modify">Αλλαγή</a><br><a href=addImage.php?id_equip='.$searchQuerySTMTResult['id_equip'].' class="btn btn-dark" id="addImage" name="addImage">Εικόνα</a></td>
 							    </tr>
-							    </tbody>
+							    </tbody>			
 					';
+					$itemsToImportCSV[].= PHP_EOL.$searchQuerySTMTResult['name_e']. ',' .$searchQuerySTMTResult['buy_year_e']. ',' .$searchQuerySTMTResult['location_e']. ',' .$searchQuerySTMTResult['quantity'];
+					$_SESSION['itemsToImportCSV'] = $itemsToImportCSV;					
 				}else{
 					echo '<p class="alert alert-warning>Δεν βρέθηκαν εξαρτήματα να ταιριάζουν στην αναζήτηση σας.</p>';
 				}
+
+
 			}
+			
+			echo '
+				<div id="createCSVForm">
+					<form method="POST"><br>
+						<button type="submit" id="createCSV" name="createCSV" class="btn btn-dark">Δημιουργία CSV</button>
+					</form>
+				</div>	
+			';
+		}else {
+			echo '<p class="alert alert-warning">Δεν βρέθηκαν αποτελέσματα για την αναζήτηση σας.</p>';
+		}	
 
     	}else {
 			while($equipQuerySTMTResult=$equipQuerySTMT->fetch(PDO::FETCH_ASSOC)){
@@ -136,6 +167,10 @@ include("views/navbar.php");
 			 	}else {
 			 		$imageHashedName = $equipQuerySTMTResult['hash_filename'];
 			 	}
+			 	if (!file_exists('uploadedImages/'.$imageHashedName)){ 
+					$imageHashedName = "noimage.png";
+				}
+			 	
 		 		if (($equipQuerySTMTResult['quantity']) > 0 ){
 		 			$descriptionQuerySQL = "SELECT * FROM description_svds WHERE id_desc= :idDesc";
 					$descriptionQuerySTMT = $db->prepare($descriptionQuerySQL);
@@ -151,16 +186,20 @@ include("views/navbar.php");
 							    <td>'.$equipQuerySTMTResult['location_e'].'</td>
 							    <td>'.$equipQuerySTMTResult['quantity'].'</td>
 						    	<td>'.$descriptionQuerySTMTResult['short_desc'].'</td>
-						    	<td id="equipmentPageButtons"><a href=functions_equipment.php?function=delete&id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark"  id="delete" name="delete">Διαγραφή</a><br><a href=functions_equipment.php?function=update&id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark" id="modify" name="modify">Αλλαγή</a><br><a href=addImage.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark" id="addImage" name="addImage">Εικόνα</a></td>
+						    	<td id="equipmentPageButtons"><a href=actions_equipment.php?action=delete&id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark"  id="delete" name="delete">Διαγραφή</a><br><a href=actions_equipment.php?action=update&id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark" id="modify" name="modify">Αλλαγή</a><br><a href=addImage.php?id_equip='.$equipQuerySTMTResult['id_equip'].' class="btn btn-dark" id="addImage" name="addImage">Εικόνα</a></td>
 							    </tr>
 					            </tbody>
 					';				
 				}
 			}
 		}
-		$rowsQuerySQL = "SELECT * FROM equip_svds WHERE retired= :retired";
+
+		
+
+		$rowsQuerySQL = "SELECT * FROM equip_svds WHERE retired= :retired AND quantity> :zero";
 		$rowsQuerySTMT = $db->prepare($rowsQuerySQL);
 		$rowsQuerySTMT->bindParam(':retired', $zero, PDO::PARAM_INT);
+		$rowsQuerySTMT->bindParam(':zero', $zero, PDO::PARAM_INT);
 	 	$rowsQuerySTMT->execute();		
 		$rowsNumberPagination = $rowsQuerySTMT->rowCount();
 	    $totalCellsPagination = ceil($rowsNumberPagination/$limitPagination);
@@ -196,8 +235,12 @@ include("views/navbar.php");
           	</ul>
           	</table>
             </div>
+            </div>
         ';
-
+    }else{
+    	header("Location: index.php");
+		die("Δεν δικαιώματα εισόδου σε αυτή τη σελίδα.");
+    }    
 include("views/footer.php");
 echo '
 	</body>

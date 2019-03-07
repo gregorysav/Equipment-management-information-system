@@ -1,6 +1,7 @@
 <?php
 //Access: Registered Users
 include("variables_file.php");
+include("checkUser.php");
 echo '
 	<!DOCTYPE html>
 	<html lang="en">
@@ -8,15 +9,17 @@ echo '
 include("views/connection.php");
 include("views/header.php");
   if ($_SESSION['email']){
+  	
   	if(isset($_GET['logout']) == 1){
   		session_unset();
   		header("Location: login.php");
   		die("Δεν έχετε συνδεθεί");
   	}
 
-  	$dateSQL = "SELECT * FROM borrow_svds WHERE id_user_borrow= :id";
+  	$dateSQL = "SELECT * FROM borrow_svds WHERE id_user_borrow= :id AND expire_date!= :expire_date";
     $dateSTMT = $db->prepare($dateSQL);
     $dateSTMT->bindParam(':id', $id, PDO::PARAM_INT);
+    $dateSTMT->bindParam(':expire_date', $null, PDO::PARAM_INT);
     $dateSTMT->execute();
     if ($dateSTMT->rowCount() > 0) {
 	    while($dateSTMTResult=$dateSTMT->fetch(PDO::FETCH_ASSOC)){		
@@ -35,7 +38,7 @@ include("views/header.php");
   		
     echo '
       <div class="container">
-      	<a href="index.php" id="indexPicture"><img src="images/uowmicon.jpg" id="uowmiconIndexPage"></a><h2 id="welcome">Ηλεκτρονική Σελίδα Δανεισμού του ΠΔΜ</h2>
+      	<a href="index.php" id="indexPicture"><img src="images/uowmicon.jpg" alt="" id="uowmiconIndexPage"></a><h2 id="welcome">Ηλεκτρονική Σελίδα Δανεισμού του ΠΔΜ</h2>
       	<div class="form-inline">
       	  <p>Καλώς ήρθες, '.$last_name.' '.$first_name.'</p>	
 	      <p><a href="logout.php" class="btn btn-light" id="welcomeMessageIndexPage">Αποσύνδεση</a></p><br>
